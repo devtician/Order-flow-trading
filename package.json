@@ -1,0 +1,22 @@
+{
+  "name": "order-flow-trading",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidPetrosyanDev/Order-flow-trading.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davidPetrosyanDev/Order-flow-trading/issues"
+  },
+  "homepage": "https://github.com/davidPetrosyanDev/Order-flow-trading#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
