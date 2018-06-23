@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/davidPetrosyanDev/Order-flow-trading#readme",
   "dependencies": {
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "node-binance-api": "^0.4.29"
   }
 }
