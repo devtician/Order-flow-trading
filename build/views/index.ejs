@@ -12,87 +12,35 @@
         <div class="exchange">
             <h2 class="exchange__name">Binance</h2>
             <div class="exchange__filter exchange__filter--1">Filter</div>
-            <div class="exchange__prices exchange__prices--1">
-                <div class="asks">
-                    <div class="row">
-                        <div class="row__level-2">level-2 1</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row__level-2">level-2</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="bids">
-                    <div class="row">
-                        <div class="row__level-2">level-2 1</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row__level-2">level-2</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                </div> 
-            </div>
+            <div class="exchange__prices exchange__prices--1" id="prices--binance"></div>
         </div>
         <div class="exchange">
             <h2 class="exchange__name">Bitfinex</h2>
             <div class="exchange__filter exchange__filter--2">Filter</div>
-            <div class="exchange__prices exchange__prices--2">
-                <div class="asks">
-                    <div class="row">
-                        <div class="row__level-2">level-2 1</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row__level-2">level-2</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="bids">
-                    <div class="row">
-                        <div class="row__level-2">level-2 1</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row__level-2">level-2</div>
-                        <div class="row__price">price</div>
-                        <div class="row__volume">
-                            <span class="sold">200</span>
-                            <span class="bought">500</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="exchange__prices exchange__prices--2" id="prices--bitfinex"></div>
         </div>
     </div>
+    <template id="row--ask">
+        <div class="row row--ask">
+            <div class="row__level-2"></div>
+            <div class="row__price"></div>
+            <div class="row__volume">
+                <span class="sold">200</span>
+                <span class="bought">500</span>
+            </div>
+        </div>
+    </template>
+    <template id="row--bid">
+        <div class="row row--bid">
+            <div class="row__level-2"></div>
+            <div class="row__price"></div>
+            <div class="row__volume">
+                <span class="sold">200</span>
+                <span class="bought">500</span>
+            </div>
+        </div>
+    </template>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="../build/public/js/appendRows.js"></script>
 </body>
 </html>

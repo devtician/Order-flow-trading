@@ -26,7 +26,7 @@ body {
 
         display: grid;
         grid-template-columns: repeat(4,1fr);
-        grid-template-rows: 30px 1fr;
+        grid-template-rows: min-content 1fr;
         row-gap: .5rem;
         column-gap: .5rem;
 
@@ -65,24 +65,22 @@ body {
         &__prices {
             background-color: white;
             font-size: 1.6rem;
-            padding: 1.5rem;
 
             display: grid;
-            grid-template-rows: 1fr 1fr;
-
-            .asks {
-                display: flex;
-                flex-direction: column-reverse;
-                justify-content: flex-start;
-            }
-
-            .bids {
-                display: flex;
-                flex-direction: column;
-            }
+            grid-template-rows: repeat(31, min-content);
+            align-content: center;
 
             .row {
+                padding: 0 1rem;
                 display: flex;
+
+                &--ask {
+                    background-color: darkgray;
+                }
+
+                &--bid {
+                    background-color: lightgoldenrodyellow;
+                }
 
                 &__level-2 {
                     flex: 1 1 0;
