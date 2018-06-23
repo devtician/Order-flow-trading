@@ -53,6 +53,8 @@ body {
           background-color: #e2e2e2; }
         .main-grid .exchange__prices .row--bid {
           background-color: lightgoldenrodyellow; }
+        .main-grid .exchange__prices .row--mid {
+          background-color: white; }
         .main-grid .exchange__prices .row__level-2 {
           flex: 1 1 0; }
         .main-grid .exchange__prices .row__price {
