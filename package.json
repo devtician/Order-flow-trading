@@ -17,9 +17,9 @@
   },
   "homepage": "https://github.com/davidPetrosyanDev/Order-flow-trading#readme",
   "dependencies": {
-<<<<<<< HEAD
     "ejs": "^2.6.1",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "node-binance-api": "^0.4.29"
   },
   "devDependencies": {
     "browser-sync": "^2.24.4",
@@ -28,9 +28,5 @@
     "gulp-nodemon": "^2.2.1",
     "gulp-sass": "^4.0.1",
     "gulp-uglify": "^3.0.0"
-=======
-    "express": "^4.16.3",
-    "node-binance-api": "^0.4.29"
->>>>>>> b62fbe199f86b28d8e7df24292dcd4cec033cae1
   }
 }
