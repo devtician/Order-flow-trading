@@ -1,0 +1,68 @@
+html {
+  font-size: 62.5%;
+  font-family: sans-serif; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #e2e2e2; }
+
+.main-grid {
+  height: 100vh;
+  display: grid;
+  column-gap: 1rem;
+  grid-template-columns: repeat(2, 1fr); }
+  .main-grid .exchange {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 30px 1fr;
+    row-gap: .5rem;
+    column-gap: .5rem; }
+    .main-grid .exchange__name {
+      grid-column: 1/-1;
+      background-color: #242424;
+      color: white;
+      text-align: center;
+      padding: .5rem;
+      margin: 0; }
+    .main-grid .exchange__filter {
+      background-color: white;
+      font-size: 1.6rem; }
+    .main-grid .exchange__filter--1 {
+      grid-column: 1/2; }
+    .main-grid .exchange__filter--2 {
+      grid-column: 4/-1; }
+    .main-grid .exchange__prices--1 {
+      grid-column: 2/-1;
+      grid-row: 2/3; }
+    .main-grid .exchange__prices--2 {
+      grid-column: 1/4;
+      grid-row: 2/3; }
+    .main-grid .exchange__prices {
+      background-color: white;
+      font-size: 1.6rem;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-rows: 1fr 1fr; }
+      .main-grid .exchange__prices .asks {
+        display: flex;
+        flex-direction: column-reverse;
+        justify-content: flex-start; }
+      .main-grid .exchange__prices .bids {
+        display: flex;
+        flex-direction: column; }
+      .main-grid .exchange__prices .row {
+        display: flex; }
+        .main-grid .exchange__prices .row__level-2 {
+          flex: 1 1 0; }
+        .main-grid .exchange__prices .row__price {
+          flex: 1 1 0;
+          text-align: center; }
+        .main-grid .exchange__prices .row__volume {
+          flex: 1 1 0;
+          text-align: right; }
+          .main-grid .exchange__prices .row__volume .sold {
+            color: #fd4e4e; }
+          .main-grid .exchange__prices .row__volume .bought {
+            color: #30c57a; }
