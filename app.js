@@ -134,14 +134,22 @@ function updateArrFinal(arr, socket){
     })
 
     let index = null
-    // console.log(arrFinal)
-
+    
     arr.forEach(function(item){
         index = arrFinal.map(o => o.price).indexOf(item.price)
         arrFinal[index].vol = item.vol
         arrFinal[index].type = item.type
     })
-
+    
+    for(i=1; i < arrFinal.length; i++){
+        if(arrFinal[i-1].type == "ask" && arrFinal[i+1].type == "ask" && arrFinal[i].type == ""){
+            arrFinal[i].type = "ask"
+            arrFinal[i].vol = 0
+        } else if(arrFinal[i-1].type == "bid" && arrFinal[i+1].type == "bid" && arrFinal[i].type == ""){
+            arrFinal[i].type = "bid"
+            arrFinal[i].vol = 0
+        }
+    }
     for(i=0; i < arrFinal.length; i++){
         if(arrFinal[i].type == ""){
             arrFinal[i].type = "ask"
@@ -149,20 +157,22 @@ function updateArrFinal(arr, socket){
             break
         }
     }
-
+    
+    
     // arrBids.forEach(function(item){
-    //     console.log(item.price)
-    //     index = arrFinal.map( o => o.price).indexOf(item.price)
-    //     console.log(index)
-    //     arrFinal[index].vol = item.vol
-    //     arrFinal[index].type = "bid"
-    // })
-
-    // arrAsks.forEach(function(item){
-    //     index = arrFinal.map( o => o.price).indexOf(item.price)
-    //     arrFinal[index].vol = item.vol
-    //     arrFinal[index].type = "ask"
-    // })
-
+        //     console.log(item.price)
+        //     index = arrFinal.map( o => o.price).indexOf(item.price)
+        //     console.log(index)
+        //     arrFinal[index].vol = item.vol
+        //     arrFinal[index].type = "bid"
+        // })
+        
+        // arrAsks.forEach(function(item){
+            //     index = arrFinal.map( o => o.price).indexOf(item.price)
+            //     arrFinal[index].vol = item.vol
+            //     arrFinal[index].type = "ask"
+            // })
+            
+    // console.log(arrFinal)
     socket.emit('push', arrFinal)
 }
