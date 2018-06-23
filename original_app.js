@@ -18,12 +18,12 @@ var scaleUpper = null
 var scaleLower = null
 var scaleMid = null
 
-var arr = []
-// var arrBids = []
-// var arrAsks = []
+// var arr = []
+var arrBids = []
+var arrAsks = []
 
 var k = null
-// var j = null
+var j = null
 
 io.on('connection', function (socket) {
     binance.websockets.depthCache(['EOSUSDT'], (symbol, depth) => {
@@ -45,11 +45,10 @@ io.on('connection', function (socket) {
             seedArrFinal()
         }
 
-        arr = []
-        // arrBids = []
-        // arrAsks = []
+        arrBids = []
+        arrAsks = []
         k = 0
-        // j = 0
+        j = 0
 
         for (i = 0; i < askPrices.length; i++) {
             askPrices[i] = precisionRound(askPrices[i], 2)
@@ -61,40 +60,39 @@ io.on('connection', function (socket) {
 
         for (i = askPrices.length - 1; i > 0; i--) {
             if (askPrices[i] - askPrices[0] <= 0.10) {
-                if (arr.length == 0) {
-                    arr.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask"})
+                if (arrAsks.length == 0) {
+                    arrAsks.push({ vol: Math.round(askVolumes[i]), price: askPrices[i]})
                 } else {
                     if (askPrices[i] == askPrices[i + 1]) {
-                        arr[k].vol += askVolumes[i]
-                        arr[k].vol = Math.round(arr[k].vol)
+                        arrAsks[k].vol += askVolumes[i]
+                        arrAsks[k].vol = Math.round(arrAsks[k].vol)
                     } else {
-                        arr.push({ vol: askVolumes[i], price: askPrices[i], type: "ask"})
+                        arrAsks.push({ vol: askVolumes[i], price: askPrices[i]})
                         k++
                     }
                 }
             }
         }
 
-        if (precisionRound(arr[k].price - bidPrices[0], 2) > 0.01) {
-            var numTimes = Math.round((arr[k].price - bidPrices[0])/0.01 - 1)
-            for (i = 1; i <= numTimes ; i++ ){
-                arr.push({ vol: "", price: precisionRound((arr[k].price - i * 0.01), 2), type: "mid" })
-                k++
-            }
-        }
+        // if (precisionRound(arr[k].price - bidPrices[0], 2) > 0.01) {
+        //     var numTimes = Math.round((arr[k].price - bidPrices[0])/0.01 - 1)
+        //     for (i = 1; i <= numTimes ; i++ ){
+        //         arr.push({ vol: "", price: precisionRound((arr[k].price - i * 0.01), 2), type: "mid" })
+        //         k++
+        //     }
+        // }
 
         for (i = 0; i < bidPrices.length; i++) {
             if (bidPrices[0] - bidPrices[i] <= 0.10) {
-                if (arr[k].type != "bid") {
-                    arr.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid"})
-                    k++
+                if (arrBids.length == 0) {
+                    arrBids.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i]})
                 } else {
                     if (bidPrices[i] == bidPrices[i - 1]) {
-                        arr[k].vol += bidVolumes[i]
-                        arr[k].vol = Math.round(arr[k].vol)
+                        arrBids[j].vol += bidVolumes[i]
+                        arrBids[j].vol = Math.round(arrBids[j].vol)
                     } else {
-                        arr.push({ vol: bidVolumes[i], price: bidPrices[i], type: "bid"})
-                        k++
+                        arrBids.push({ vol: bidVolumes[i], price: bidPrices[i]})
+                        j++
                     }
                 }
             }
@@ -102,10 +100,10 @@ io.on('connection', function (socket) {
 
         // console.log(arr)
         // console.log("*********************")
-        // console.log(arrBids)
-        // console.log(arrAsks)
+        console.log(arrBids)
+        console.log(arrAsks)
 
-        updateArrFinal(arr, socket)
+        updateArrFinal(arrBids, arrAsks, socket)
     })
     socket.on('response', function (data) {
         console.log(data);
@@ -127,42 +125,27 @@ function seedArrFinal(){
     }
 }
 
-function updateArrFinal(arr, socket){
+function updateArrFinal(arrBids, arrAsks, socket){
     arrFinal.forEach(function(item){
         item.vol = ""
         item.type = ""
     })
 
     let index = null
-    // console.log(arrFinal)
-
-    arr.forEach(function(item){
-        index = arrFinal.map(o => o.price).indexOf(item.price)
+    console.log(arrFinal)
+    arrBids.forEach(function(item){
+        console.log(item.price)
+        index = arrFinal.map( o => o.price).indexOf(item.price)
+        console.log(index)
         arrFinal[index].vol = item.vol
-        arrFinal[index].type = item.type
+        arrFinal[index].type = "bid"
     })
 
-    for(i=0; i < arrFinal.length; i++){
-        if(arrFinal[i].type == ""){
-            arrFinal[i].type = "ask"
-        } else {
-            break
-        }
-    }
-
-    // arrBids.forEach(function(item){
-    //     console.log(item.price)
-    //     index = arrFinal.map( o => o.price).indexOf(item.price)
-    //     console.log(index)
-    //     arrFinal[index].vol = item.vol
-    //     arrFinal[index].type = "bid"
-    // })
-
-    // arrAsks.forEach(function(item){
-    //     index = arrFinal.map( o => o.price).indexOf(item.price)
-    //     arrFinal[index].vol = item.vol
-    //     arrFinal[index].type = "ask"
-    // })
+    arrAsks.forEach(function(item){
+        index = arrFinal.map( o => o.price).indexOf(item.price)
+        arrFinal[index].vol = item.vol
+        arrFinal[index].type = "ask"
+    })
 
     socket.emit('push', arrFinal)
 }

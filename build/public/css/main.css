@@ -43,8 +43,8 @@ body {
       background-color: white;
       font-size: 1.6rem;
       display: grid;
-      grid-template-rows: repeat(31, min-content);
-      align-content: center; }
+      /* grid-template-rows: repeat(31, min-content); */
+      align-content: stretch; }
       .main-grid .exchange__prices .row {
         padding: 0 1rem;
         display: flex; }
