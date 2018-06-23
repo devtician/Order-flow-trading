@@ -40,7 +40,7 @@ io.on('connection', function (socket) {
         }
 
         for (i = askPrices.length - 1; i > 0; i--) {
-            if (askPrices[i] - askPrices[0] <= 0.09) {
+            if (askPrices[i] - askPrices[0] <= 0.19) {
                 if (arr.length == 0) {
                     arr.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask" })
                 } else {
@@ -55,13 +55,17 @@ io.on('connection', function (socket) {
             }
         }
 
-        while ((arr[k].price - 0.01) != bidPrices[0]) {
-            arr.push({ vol: "", price: arr[k].price - 0.01, type: "mid" })
-            k++
+        if (precisionRound(arr[k].price - bidPrices[0], 2) > 0.01) {
+            var numTimes = Math.round((arr[k].price - bidPrices[0])/0.01 - 1)
+            for (i = 1; i <= numTimes ; i++ ){
+                arr.push({ vol: "", price: precisionRound((arr[k].price - i * 0.01), 2), type: "mid" })
+                k++
+            }
+            
         }
 
         for (i = 0; i < bidPrices.length; i++) {
-            if (bidPrices[0] - bidPrices[i] <= 0.09) {
+            if (bidPrices[0] - bidPrices[i] <= 0.19) {
                 if (arr[k].type != "bid") {
                     arr.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid" })
                     k++

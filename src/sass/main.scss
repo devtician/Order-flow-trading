@@ -11,14 +11,14 @@ html {
 body {
     margin: 0;
     padding: 0;
-    background-color: $light;
+    background-color: $dark;
 }
 
 .main-grid {
     height: 100vh;
     display: grid;
 
-    column-gap: 1rem;
+    column-gap: .5rem;
     grid-template-columns: repeat(2,1fr);
 
     .exchange {
@@ -28,7 +28,7 @@ body {
         grid-template-columns: repeat(4,1fr);
         grid-template-rows: min-content 1fr;
         row-gap: .5rem;
-        column-gap: .5rem;
+        column-gap: .2rem;
 
         &__name {
             grid-column: 1/-1;
@@ -75,7 +75,7 @@ body {
                 display: flex;
 
                 &--ask {
-                    background-color: darkgray;
+                    background-color: $light;
                 }
 
                 &--bid {

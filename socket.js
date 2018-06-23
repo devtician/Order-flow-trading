@@ -44,6 +44,7 @@ binance.websockets.depthCache(['EOSUSDT'], (symbol, depth) => {
     while((arr[k].price - 0.01) != bidPrices[0]){
         arr.push({ vol: "", price: arr[k].price - 0.01, type: "mid"})
         k++
+        return
     }
 
     for (i = 0; i < bidPrices.length; i++) {
@@ -63,12 +64,12 @@ binance.websockets.depthCache(['EOSUSDT'], (symbol, depth) => {
         }
     }
 
-    // console.log(arr)
-    // console.log("*********************")
+    console.log(arr)
+    console.log("*********************")
 
 })
 
-module.exports = arr
+// module.exports = arr
 
 function precisionRound(number, precision){
     var factor = Math.pow(10, precision);
