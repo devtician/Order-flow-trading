@@ -66,6 +66,7 @@ body {
         &__prices {
             background-color: white;
             font-size: 1.6rem;
+            font-weight: bold;
 
             display: grid;
             align-content: stretch;
@@ -89,6 +90,7 @@ body {
 
                 &__level-2 {
                     flex: 1 1 0;
+                    text-align: right;
                 }
 
                 &__price {
@@ -99,12 +101,16 @@ body {
                 &__volume {
                     flex: 1 1 0;
                     text-align: right;
+                    
+                    display: flex;
 
                     .sold {
+                        width: 50%;
                         color: $red;
                     }
 
                     .bought {
+                        width: 50%;
                         color: $green;
                     }
                 }

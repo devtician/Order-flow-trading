@@ -27,10 +27,16 @@ socket.on('push', function (data) {
         price = clone.querySelector(".row__price");
         sold = clone.querySelector(".sold");
         bought = clone.querySelector(".bought");
-        vol.textContent = data[i].vol;
+        if (data[i].vol != "") {
+            vol.textContent = Number(data[i].vol).toLocaleString();
+        }
         price.textContent = data[i].price;
-        sold.textContent = data[i].hit;
-        bought.textContent = data[i].lift;
+        if (data[i].hit != null) {
+            sold.textContent = Number(data[i].hit).toLocaleString();
+        }
+        if (data[i].lift != null) {
+            bought.textContent = Number(data[i].lift).toLocaleString();
+        }
         tb.appendChild(clone);
     }
 

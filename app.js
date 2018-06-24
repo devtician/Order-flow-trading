@@ -42,8 +42,8 @@ io.on('connection', function (socket) {
             scaleMid = precisionRound(((bestBid + bestAsk)/2), 2)
             scaleUpper = precisionRound((scaleMid + 0.24), 2)
             scaleLower = precisionRound((scaleMid - 0.24), 2)
-            thresholdUpper = precisionRound((scaleMid + 0.04), 2)
-            thresholdLower = precisionRound((scaleMid - 0.04), 2)
+            thresholdUpper = precisionRound((scaleMid + 0.14), 2)
+            thresholdLower = precisionRound((scaleMid - 0.14), 2)
             seedArrFinal()
         }
 
@@ -67,7 +67,7 @@ io.on('connection', function (socket) {
                         arr[k].vol += askVolumes[i]
                         arr[k].vol = Math.round(arr[k].vol)
                     } else {
-                        arr.push({ vol: askVolumes[i], price: askPrices[i], type: "ask", hit: null, lift: null})
+                        arr.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
                         k++
                     }
                 }
@@ -111,7 +111,7 @@ io.on('connection', function (socket) {
         let index = arrFinal.map(o => o.price).indexOf(roundedPrice)
         if(maker == true){
             arrFinal[index].hit += Number(quantity)  
-            arrFinal[index].hit = precisionRound((arrFinal[index].hit), 2)  
+            arrFinal[index].hit = precisionRound((arrFinal[index].hit), 2)
             console.log("the updated hit: ", arrFinal[index].hit)  
         } else {
             arrFinal[index].lift += Number(quantity)  

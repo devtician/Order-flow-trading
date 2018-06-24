@@ -43,6 +43,7 @@ body {
     .main-grid .exchange__prices {
       background-color: white;
       font-size: 1.6rem;
+      font-weight: bold;
       display: grid;
       align-content: stretch; }
       .main-grid .exchange__prices .row {
@@ -56,14 +57,18 @@ body {
         .main-grid .exchange__prices .row--mid {
           background-color: white; }
         .main-grid .exchange__prices .row__level-2 {
-          flex: 1 1 0; }
+          flex: 1 1 0;
+          text-align: right; }
         .main-grid .exchange__prices .row__price {
           flex: 1 1 0;
           text-align: center; }
         .main-grid .exchange__prices .row__volume {
           flex: 1 1 0;
-          text-align: right; }
+          text-align: right;
+          display: flex; }
           .main-grid .exchange__prices .row__volume .sold {
+            width: 50%;
             color: #fd4e4e; }
           .main-grid .exchange__prices .row__volume .bought {
+            width: 50%;
             color: #30c57a; }
