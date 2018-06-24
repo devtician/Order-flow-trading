@@ -25,8 +25,12 @@ socket.on('push', function (data) {
         }
         vol = clone.querySelector(".row__level-2");
         price = clone.querySelector(".row__price");
+        sold = clone.querySelector(".sold");
+        bought = clone.querySelector(".bought");
         vol.textContent = data[i].vol;
         price.textContent = data[i].price;
+        sold.textContent = data[i].hit;
+        bought.textContent = data[i].lift;
         tb.appendChild(clone);
     }
 
