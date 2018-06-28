@@ -13,6 +13,22 @@ app.get("/", function(req, res){
     res.render("index")
 })
 
+
+// BITFINEX Initialization
+var btfx = require("./btfx.js")
+const WebSocket = require("ws")
+const wss = new WebSocket("wss://api.bitfinex.com/ws/2")
+
+let chanId_EOSUSD
+
+wss.onopen = () => init()
+
+function init(){
+    wss.send(btfx.subscribeOrderbook("EOSUSD"))
+}
+
+
+// BINANCE Variables
 var arrFinal = []
 var scaleUpper = null
 var scaleLower = null
@@ -21,9 +37,11 @@ var thresholdUpper = null
 var thresholdLower = null
 
 var arr = []
+var arrTrades = []
 var k = null
-
 var roundedPrice = null
+
+
 
 io.on('connection', function (socket) {
     binance.websockets.depthCache(['EOSUSDT'], (symbol, depth) => {
@@ -92,14 +110,14 @@ io.on('connection', function (socket) {
                         arr[k].vol += bidVolumes[i]
                         arr[k].vol = Math.round(arr[k].vol)
                     } else {
-                        arr.push({ vol: bidVolumes[i], price: bidPrices[i], type: "bid", hit: null, lift: null})
+                        arr.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
                         k++
                     }
                 }
             }
         }
 
-        updateArrFinal(arr, socket)
+        updateArrFinal(socket, "orderbook")
     })
 
     binance.websockets.trades(['EOSUSDT'], (trades) => {
@@ -108,19 +126,65 @@ io.on('connection', function (socket) {
         // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", m: "+maker+", M" + M);
         roundedPrice = precisionRound(Number(price), 2)
         console.log(roundedPrice)
-        let index = arrFinal.map(o => o.price).indexOf(roundedPrice)
-        if(maker == true){
-            arrFinal[index].hit += Number(quantity)  
-            arrFinal[index].hit = precisionRound((arrFinal[index].hit), 2)
-            console.log("the updated hit: ", arrFinal[index].hit)  
+        let index = arrTrades.map(o => o.price).indexOf(roundedPrice)
+
+        if(index == -1){
+            if(maker == true){
+                arrTrades.push({price: roundedPrice, hit: Math.round(Number(quantity)), lift: null})
+            } else {
+                arrTrades.push({price: roundedPrice, hit: null, lift: Math.round(Number(quantity))})
+            }
         } else {
-            arrFinal[index].lift += Number(quantity)  
-            arrFinal[index].lift = precisionRound((arrFinal[index].lift), 2)
-            console.log("the updated lift: ", arrFinal[index].lift)    
+            if(maker == true){
+                arrTrades[index].hit += Number(quantity)  
+                arrTrades[index].hit = Math.round(arrTrades[index].hit)
+                console.log("the updated hit: ", arrTrades[index].hit)  
+            } else {
+                arrTrades[index].lift += Number(quantity)  
+                arrTrades[index].lift = Math.round(arrTrades[index].lift)
+                console.log("the updated lift: ", arrTrades[index].lift)    
+            }
         }
         
-        socket.emit('push', arrFinal)
+        wss.onmessage = (message) => {
+            var response = JSON.parse(message.data)
+
+            if(Array.isArray(response)){
+                switch(response[0]){
+                    case chanId_EOSUSD:
+                        if(response[1].length > 3 ){
+                            btfx.snapshotOrderbook(response)
+                        } else {
+                            btfx.updateOrderbook(response)
+                        }
+                        break
+                    default:
+                        console.log(response)
+                }
+            } else {
+                var event = response.event
+                var channel = response.channel
+                var pair = response.pair
+                switch(event){
+                    case "subscribed":
+                        if(channel == "book" && pair == "EOSUSD"){
+                            chanId_EOSUSD = response.chanId
+                            console.log("Book channel ID updated")
+                        }
+                        break
+                    case "info":
+                        console.log(response)
+                        break
+                    default:
+                        console.log(response)
+                }
+            }
+        }
+
+        updateArrFinal(socket, "trades")
     })
+
+
 
     socket.on('response', function (data) {
         console.log(data);
@@ -143,36 +207,51 @@ function seedArrFinal(){
     }
 }
 
-function updateArrFinal(arr, socket){
-    arrFinal.forEach(function(item){
-        item.vol = ""
-        item.type = ""
-    })
+function updateArrFinal(socket, updateType){
+    if(updateType == "orderbook"){
+        arrFinal.forEach(function(item){
+            item.vol = ""
+            item.type = ""
+        })
+    
+        let index = null
+        
+        arr.forEach(function(item){
+            index = arrFinal.map(o => o.price).indexOf(item.price)
+            arrFinal[index].vol = item.vol
+            arrFinal[index].type = item.type
+        })
+        
+        for(i=1; i < arrFinal.length; i++){
+            if(arrFinal[(i-1)].type == "ask" && arrFinal[(i+1)].type == "ask" && arrFinal[i].type == ""){
+                arrFinal[i].type = "ask"
+                arrFinal[i].vol = "0"
+            } else if(arrFinal[(i-1)].type == "bid" && arrFinal[(i+1)].type == "bid" && arrFinal[i].type == ""){
+                arrFinal[i].type = "bid"
+                arrFinal[i].vol = "0"
+            }
+        }
+        for(i=0; i < arrFinal.length; i++){
+            if(arrFinal[i].type == ""){
+                arrFinal[i].type = "ask"
+            } else {
+                break
+            }
+        }
 
-    let index = null
-    
-    arr.forEach(function(item){
-        index = arrFinal.map(o => o.price).indexOf(item.price)
-        arrFinal[index].vol = item.vol
-        arrFinal[index].type = item.type
-    })
-    
-    for(i=1; i < arrFinal.length; i++){
-        if(arrFinal[i-1].type == "ask" && arrFinal[i+1].type == "ask" && arrFinal[i].type == ""){
-            arrFinal[i].type = "ask"
-            arrFinal[i].vol = 0
-        } else if(arrFinal[i-1].type == "bid" && arrFinal[i+1].type == "bid" && arrFinal[i].type == ""){
-            arrFinal[i].type = "bid"
-            arrFinal[i].vol = 0
-        }
+        arrTrades.forEach(function(item){
+            index = arrFinal.map(o => o.price).indexOf(item.price)
+            arrFinal[index].hit = item.hit
+            arrFinal[index].lift = item.lift
+        })
+
+    } else if(updateType == "trades"){
+        arrTrades.forEach(function(item){
+            index = arrFinal.map(o => o.price).indexOf(item.price)
+            arrFinal[index].hit = item.hit
+            arrFinal[index].lift = item.lift
+        })
     }
-    for(i=0; i < arrFinal.length; i++){
-        if(arrFinal[i].type == ""){
-            arrFinal[i].type = "ask"
-        } else {
-            break
-        }
-    }
-    
+
     socket.emit('push', arrFinal)
 }
