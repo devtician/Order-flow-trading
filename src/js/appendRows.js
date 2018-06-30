@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost:3000');
+var socket = io.connect('http://192.168.0.16:3001');
 socket.on('push', function (data) {
     console.log(data)
     var binance = document.getElementById("prices--binance");

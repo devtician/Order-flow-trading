@@ -253,5 +253,5 @@ function updateArrFinal(socket, updateType){
         })
     }
 
-    socket.emit('push', arrFinal)
+    io.sockets.emit('push', arrFinal)
 }
