@@ -2,6 +2,18 @@ let bids = []
 let asks = [] 
 let best = {}
 
+var arrBitfinex = []
+var btfxUpper = null
+var btfxLower = null
+var btfxMid = null
+var btfxThreshUpper = null
+var btfxThreshLower = null
+
+var arrbtfx = []
+var arrTradesbtfx = []
+var j = null
+var roundedPricebtfx = null
+
 module.exports = function(){
     return {
         best,
@@ -29,7 +41,7 @@ module.exports = function(){
             // console.log(best.bidVolume, best.bidPrice, best.askPrice, best.askVolume)
         },
 
-        updateOrderbook: function(response){
+        updateOrderbook: function(response, socket){
             if(response[1] != "hb"){
                 let price = response[1][0]
                 let count = response[1][1]
@@ -67,6 +79,71 @@ module.exports = function(){
                     }
                     bestAsk(price)
                 }
+
+                if(arrBitfinex.length == 0 || best.askPrice > btfxThreshUpper || best.bidPrice < btfxThreshLower){
+                    btfxMid = precisionRound(((best.bidPrice + best.askPrice)/2), 2)
+                    btfxUpper = precisionRound((btfxMid + 0.24), 2)
+                    btfxLower = precisionRound((btfxMid - 0.24), 2)
+                    btfxThreshUpper = precisionRound((btfxMid + 0.14), 2)
+                    btfxThreshLower = precisionRound((btfxMid - 0.14), 2)
+                    seedArrFinal()
+                }
+
+                arrbtfx = []
+                j = 0
+
+                for( i = 0; i < asks.length; i++){
+                    asks[i].price = precisionRound(asks[i].price, 2)
+                }
+
+                for( i = 0; i < bids.length; i++){
+                    bids[i].price = precisionRound(bids[i].price, 2)
+                }
+
+                for(i = asks.length - 1; i > 0; i--) {
+                    if(asks[i].price - best.askPrice <= 0.14){
+                        if(arrbtfx.length == 0){
+                            arrbtfx.push({vol: Math.round(asks[i].volume), price: asks[i].price, type: "ask", hit: null, lift: null})
+                        } else {
+                            let index = arrbtfx.map(o => o.price).indexOf(asks[i].price) 
+                            if(index != -1){
+                                arrbtfx[index].vol += asks[i].volume
+                                arrbtfx[index].vol = Math.round(arrbtfx[index].vol) 
+                            } else {
+                                arrbtfx.push({vol: Math.round(asks[i].volume), price: asks[i].price, type: "ask", hit: null, lift: null})
+                                j++
+                            }
+                        }
+                    }
+                }
+
+                if (precisionRound(best.askPrice - best.bidPrice, 2) > 0.01){
+                    var numTimes = Math.round((best.askPrice - best.bidPrice)/0.01 - 1)
+                    for(i = 1; i <= numTimes; i++){
+                        arrbtfx.push({vol: "", price: precisionRound((best.askPrice - i * 0.01), 2), type: "mid", hit: null, lift: null})
+                    }
+                    j++
+                }
+
+                for(i = 0; i < bids.length; i++ ){
+                    if(best.bidPrice - bids[i].price <= 0.14){
+                        if(arrbtfx[j].type != "bid"){
+                            arrbtfx.push({vol: Math.round(bids[i].volume), price: bids[i].price, type: "bid", hit: null, lift: null})
+                            j++
+                        } else {
+                            let ind = arrbtfx.map(o => o.price).indexOf(bids[i].price)
+                            if(index != -1){
+                                arrbtfx[ind].vol += bids[i].volume
+                                arrbtfx[ind].vol = Math.round(arrbtfx[ind].vol)
+                            } else {
+                                arrbtfx.push({vol: Math.round(bids[i].volume), price: bids[i].price, type: "bid", hit: null, lift: null})
+                                j++
+                            }
+                        }
+                    }
+                }
+
+                updateArrBitfinex(socket, "orderbook")
             }
         },
 
@@ -80,3 +157,83 @@ module.exports = function(){
         }
     }
 }()
+
+
+function bestAsk(price){
+    if(price <= best.askPrice){
+        best.askPrice = Math.min(...asks.map(o => o.price))
+        let askIndex = asks.map(o => o.price).indexOf(best.askPrice)
+        best.askVolume = asks[askIndex].volume
+        // console.log(best.bidVolume, best.bidPrice, best.askPrice, best.askVolume)
+    }
+}
+
+function bestBid(price){
+    if(price >= best.bidPrice){
+        best.bidPrice = Math.max(...bids.map(o => o.price))
+        let bidIndex = bids.map(o => o.price).indexOf(best.bidPrice)
+        best.bidVolume = bids[bidIndex].volume
+        // console.log(best.bidVolume, best.bidPrice, best.askPrice, best.askVolume)
+    }
+}
+
+function precisionRound(number, precision) {
+    var factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
+}
+
+function seedArrFinal(){
+    arrBitfinex = []
+    for( i = btfxUpper; i >= btfxLower; i -= 0.01 ){
+        arrBitfinex.push({vol: "", price: precisionRound(i, 2), type: "", hit: null, lift: null})
+    }
+}
+
+function updateArrBitfinex(socket, updateType){
+    if(updateType == "orderbook"){
+        arrBitfinex.forEach(function(item){
+            item.vol = ""
+            item.type = ""
+        })
+    
+        let index = null
+        
+        arrbtfx.forEach(function(item){
+            index = arrBitfinex.map(o => o.price).indexOf(item.price)
+            arrBitfinex[index].vol = item.vol
+            arrBitfinex[index].type = item.type
+        })
+        
+        for(i=1; i < arrBitfinex.length; i++){
+            if(arrBitfinex[(i-1)].type == "ask" && arrBitfinex[(i+1)].type == "ask" && arrBitfinex[i].type == ""){
+                arrBitfinex[i].type = "ask"
+                arrBitfinex[i].vol = "0"
+            } else if(arrBitfinex[(i-1)].type == "bid" && arrBitfinex[(i+1)].type == "bid" && arrBitfinex[i].type == ""){
+                arrBitfinex[i].type = "bid"
+                arrBitfinex[i].vol = "0"
+            }
+        }
+        for(i=0; i < arrBitfinex.length; i++){
+            if(arrBitfinex[i].type == ""){
+                arrBitfinex[i].type = "ask"
+            } else {
+                break
+            }
+        }
+
+        // arrTradesbtfx.forEach(function(item){
+        //     index = arrBitfinex.map(o => o.price).indexOf(item.price)
+        //     arrBitfinex[index].hit = item.hit
+        //     arrBitfinex[index].lift = item.lift
+        // })
+
+    } else if(updateType == "trades"){
+        arrTradesbtfx.forEach(function(item){
+            index = arrBitfinex.map(o => o.price).indexOf(item.price)
+            arrBitfinex[index].hit = item.hit
+            arrBitfinex[index].lift = item.lift
+        })
+    }
+
+    io.sockets.emit('pushbtfx', arrBitfinex)
+}

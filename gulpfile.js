@@ -43,9 +43,9 @@ gulp.task('watch', function(){
 
 gulp.task('browser-sync', function () {
     browserSync.init(null, {
-        open: 'external',
-        host: '192.168.0.16',
-        proxy: 'localhost:3000', // or project.dev/app/
+        open: 'local',
+        host: 'localhost',
+        proxy: 'localhost:3000',
         port: 3001,
         ws: true
     });
