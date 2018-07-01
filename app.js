@@ -130,6 +130,8 @@ io.on('connection', function (socket) {
         // console.log(roundedPrice)
         let index = arrTrades.map(o => o.price).indexOf(roundedPrice)
 
+        io.sockets.emit("binance-trades", {price: roundedPrice, vol: quantity, time: eventTime, side: maker})
+
         if(index == -1){
             if(maker == true){
                 arrTrades.push({price: roundedPrice, hit: Math.round(Number(quantity)), lift: null})
