@@ -11,7 +11,14 @@
     <div class="main-grid">
         <div class="exchange">
             <h2 class="exchange__name">Binance</h2>
-            <div class="exchange__filter exchange__filter--1">Filter</div>
+            <div class="exchange__filter exchange__filter--1">
+                <input type="number" class="filter__input" id="binance-filter" onkeyup="updateBinanceFilter()">
+                <div class="row row--buy">
+                    <div class="row__price">8.01</div>
+                    <div class="row__volume">12,000</div>
+                    <div class="row__time">22:30</div>
+                </div>
+            </div>
             <div class="exchange__prices exchange__prices--1" id="prices--binance"></div>
         </div>
         <div class="exchange">

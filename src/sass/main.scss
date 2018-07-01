@@ -1,7 +1,9 @@
 $dark: rgb(36, 36, 36);
 $light: rgb(226, 226, 226);
 $red: hsl(0, 98%, 65%);
+$light-red: hsl(0, 100%, 86%);
 $green: rgb(48, 197, 122);
+$light-green: rgb(165, 247, 206);
 
 html {
     font-size: 62.5%;
@@ -43,6 +45,50 @@ body {
         &__filter {
             background-color: white;
             font-size: 1.6rem;
+
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: 3.9rem repeat(20,min-content);
+
+            .filter__input {
+                grid-column: 1/-1;
+                text-align: center;
+            }
+
+            .row {
+                padding: 0 1rem;
+                border-bottom: 1px solid rgb(126, 124, 124);
+                display: flex;
+                align-items: center;
+
+                grid-column: 1/-1;
+
+                &--buy {
+                    background-color: $light-green;
+                }
+
+                &--sell {
+                    background-color: $light-red;
+                }
+
+                &__price {
+                    flex: 1 1 0;
+                    text-align: center;
+                    border-right: 1px solid rgb(126, 124, 124);
+                }
+
+                &__volume {
+                    flex: 1 1 0;
+                    text-align: center;
+                    padding-right: 0.5rem;
+                    border-right: 1px solid rgb(126, 124, 124);
+                }
+
+                &__time {
+                    padding-left: 1rem;
+                    text-align: center;
+                }
+            }
         }
 
         &__filter--1 {
@@ -73,6 +119,7 @@ body {
 
             .row {
                 padding: 0 1rem;
+                border-top: 1px solid rgb(201, 201, 201);
                 display: flex;
                 align-items: center;
 
@@ -91,11 +138,14 @@ body {
                 &__level-2 {
                     flex: 1 1 0;
                     text-align: right;
+                    padding-right: 0.5rem;
                 }
 
                 &__price {
                     flex: 1 1 0;
                     text-align: center;
+                    border-right: 1px solid rgb(201, 201, 201);
+                    border-left: 1px solid rgb(201, 201, 201);
                 }
 
                 &__volume {
