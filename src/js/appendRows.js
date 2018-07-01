@@ -1,15 +1,16 @@
 var socket = io.connect('http://localhost:3001');
+
+// Instantiate the table with the existing HTML tbody
+// and the row with the template
+var tAsk = document.querySelector('#row--ask');
+var tBid = document.querySelector('#row--bid');
+var tMid = document.querySelector('#row--mid');
+
 socket.on('push', function (data) {
     var binance = document.getElementById("prices--binance");
     while (binance.firstChild) {
         binance.removeChild(binance.firstChild);
     }
-
-    // Instantiate the table with the existing HTML tbody
-    // and the row with the template
-    var tAsk = document.querySelector('#row--ask');
-    var tBid = document.querySelector('#row--bid');
-    var tMid = document.querySelector('#row--mid');
 
     // Clone the new row and insert it into the table
     var tb = document.querySelector("#prices--binance");
@@ -42,16 +43,11 @@ socket.on('push', function (data) {
     socket.emit('response', "success");
 });
 socket.on('pushbtfx', function (data) {
+    console.log(data)
     var bitfinex = document.getElementById("prices--bitfinex");
     while (bitfinex.firstChild) {
         bitfinex.removeChild(bitfinex.firstChild);
     }
-
-    // Instantiate the table with the existing HTML tbody
-    // and the row with the template
-    var tAsk = document.querySelector('#row--ask');
-    var tBid = document.querySelector('#row--bid');
-    var tMid = document.querySelector('#row--mid');
 
     // Clone the new row and insert it into the table
     var tb = document.querySelector("#prices--bitfinex");

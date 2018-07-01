@@ -20,11 +20,14 @@ const WebSocket = require("ws")
 const wss = new WebSocket("wss://api.bitfinex.com/ws/2")
 
 let chanId_EOSUSD
+let chanId_trades
 
 wss.onopen = () => init()
 
 function init(){
     wss.send(btfx.subscribeOrderbook("EOSUSD"))
+    wss.send(btfx.subscribeTrades("EOSUSD"))
+    // console.log("subscribed orderbook")
 }
 
 // BINANCE Variables
@@ -124,7 +127,7 @@ io.on('connection', function (socket) {
         // console.log(trades)
         // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", m: "+maker+", M" + M);
         roundedPrice = precisionRound(Number(price), 2)
-        console.log(roundedPrice)
+        // console.log(roundedPrice)
         let index = arrTrades.map(o => o.price).indexOf(roundedPrice)
 
         if(index == -1){
@@ -137,58 +140,71 @@ io.on('connection', function (socket) {
             if(maker == true){
                 arrTrades[index].hit += Number(quantity)  
                 arrTrades[index].hit = Math.round(arrTrades[index].hit)
-                console.log("the updated hit: ", arrTrades[index].hit)  
+                // console.log("the updated hit: ", arrTrades[index].hit)  
             } else {
                 arrTrades[index].lift += Number(quantity)  
                 arrTrades[index].lift = Math.round(arrTrades[index].lift)
-                console.log("the updated lift: ", arrTrades[index].lift)    
+                // console.log("the updated lift: ", arrTrades[index].lift)    
             }
         }
         
-        wss.onmessage = (message) => {
-            var response = JSON.parse(message.data)
-
-            if(Array.isArray(response)){
-                switch(response[0]){
-                    case chanId_EOSUSD:
-                        if(response[1].length > 3 ){
-                            btfx.snapshotOrderbook(response)
-                        } else {
-                            btfx.updateOrderbook(response, socket)
-                        }
-                        break
-                    default:
-                        console.log(response)
-                }
-            } else {
-                var event = response.event
-                var channel = response.channel
-                var pair = response.pair
-                switch(event){
-                    case "subscribed":
-                        if(channel == "book" && pair == "EOSUSD"){
-                            chanId_EOSUSD = response.chanId
-                            console.log("Book channel ID updated")
-                        }
-                        break
-                    case "info":
-                        console.log(response)
-                        break
-                    default:
-                        console.log(response)
-                }
-            }
-        }
-
         updateArrFinal(socket, "trades")
     })
 
-
-
     socket.on('response', function (data) {
-        console.log(data);
+        // console.log(data);
     });
 });
+
+wss.onmessage = (message) => {
+    var response = JSON.parse(message.data)
+    // console.log("this is the response: ", response)
+
+    if(Array.isArray(response)){
+        switch(response[0]){
+            case chanId_EOSUSD:
+                if(response[1].length > 3 ){
+                    // console.log("sending to snapshot")
+                    btfx.snapshotOrderbook(response)
+                } else {
+                    // console.log("sending to updateorderbook")
+                    let array = btfx.updateOrderbook(response)
+                    if(array != null){
+                        io.sockets.emit("pushbtfx", array)
+                    }
+                    // console.log("sent emit message")
+                }
+                break
+            case chanId_trades:
+                let trades = btfx.updateTrades(response)
+                if(trades != null){
+                    io.sockets.emit("pushbtfx", trades)
+                }
+            default:
+                console.log(response)
+        }
+    } else {
+        var event = response.event
+        var channel = response.channel
+        var pair = response.pair
+        switch(event){
+            case "subscribed":
+                if(channel == "book" && pair == "EOSUSD"){
+                    chanId_EOSUSD = response.chanId
+                    console.log("Book channel ID updated")
+                } else if(channel == "trades" && pair == "EOSUSD"){
+                    chanId_trades = response.chanId
+                    console.log("Trades channel ID updated")
+                }
+                break
+            case "info":
+                console.log(response)
+                break
+            default:
+                console.log(response)
+        }
+    }
+}
 
 server.listen(3000, function(){
     console.log("Server running on port 3000")
