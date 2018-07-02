@@ -12,20 +12,38 @@
         <div class="exchange">
             <h2 class="exchange__name">Binance</h2>
             <div class="exchange__filter exchange__filter--1">
-                <input type="number" class="filter__input" id="binance-filter">
-                <button onclick="resetBinanceFilter()">Reset</button>
-                <div class="binance-trades"></div>
+                <input type="number" class="filter__input" id="binance-eos-filter" value="1000">
+                <button onclick="resetBinanceEosFilter()">Reset</button>
+                <div class="binance-eos-trades"></div>
             </div>
-            <div class="exchange__prices exchange__prices--1" id="prices--binance"></div>
+            <div class="exchange__prices exchange__prices--1" id="prices-eos-binance"></div>
         </div>
         <div class="exchange">
             <h2 class="exchange__name">Bitfinex</h2>
             <div class="exchange__filter exchange__filter--2">
-                <input type="number" class="filter__input" id="bitfinex-filter">
-                <button onclick="resetBitfinexFilter()">Reset</button>
-                <div class="bitfinex-trades"></div>
+                <input type="number" class="filter__input" id="bitfinex-eos-filter" value="1000">
+                <button onclick="resetBitfinexEosFilter()">Reset</button>
+                <div class="bitfinex-eos-trades"></div>
             </div>
-            <div class="exchange__prices exchange__prices--2" id="prices--bitfinex"></div>
+            <div class="exchange__prices exchange__prices--2" id="prices-eos-bitfinex"></div>
+        </div>
+        <div class="exchange">
+            <h2 class="exchange__name">Binance</h2>
+            <div class="exchange__filter exchange__filter--1">
+                <input type="number" class="filter__input" id="binance-btc-filter" value="1000">
+                <button onclick="resetBinanceBtcFilter()">Reset</button>
+                <div class="binance-btc-trades"></div>
+            </div>
+            <div class="exchange__prices exchange__prices--1" id="prices-btc-binance"></div>
+        </div>
+        <div class="exchange">
+            <h2 class="exchange__name">Bitfinex</h2>
+            <div class="exchange__filter exchange__filter--2">
+                <input type="number" class="filter__input" id="bitfinex-btc-filter" value="1000">
+                <button onclick="resetBitfinexBtcFilter()">Reset</button>
+                <div class="bitfinex-btc-trades"></div>
+            </div>
+            <div class="exchange__prices exchange__prices--2" id="prices-btc-bitfinex"></div>
         </div>
     </div>
     <template id="row--buy">

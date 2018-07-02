@@ -42,6 +42,7 @@ var arr = []
 var arrTrades = []
 var k = null
 var roundedPrice = null
+let indexBinance = null
 
 
 
@@ -131,7 +132,7 @@ io.on('connection', function (socket) {
         // console.log(roundedPrice)
         let index = arrTrades.map(o => o.price).indexOf(roundedPrice)
 
-        io.sockets.emit("binance-trades", {price: roundedPrice, vol: quantity, time: eventTime, side: maker})
+        io.sockets.emit("binance-eos-trades", {price: roundedPrice, vol: quantity, time: eventTime, side: maker})
 
         if(index == -1){
             if(maker == true){
@@ -173,7 +174,7 @@ wss.onmessage = (message) => {
                     // console.log("sending to updateorderbook")
                     let array = btfx.updateOrderbook(response)
                     if(array != null){
-                        io.sockets.emit("pushbtfx", array)
+                        io.sockets.emit("pushbtfx-eos", array)
                     }
                     // console.log("sent emit message")
                 }
@@ -181,8 +182,8 @@ wss.onmessage = (message) => {
             case chanId_trades:
                 let trades = btfx.updateTrades(response)
                 if(trades != null){
-                    io.sockets.emit("pushbtfx", trades[0])
-                    io.sockets.emit("bitfinex-trades", trades[1])
+                    io.sockets.emit("pushbtfx-eos", trades[0])
+                    io.sockets.emit("bitfinex-eos-trades", trades[1])
                 }
             default:
                 console.log(response)
@@ -233,12 +234,12 @@ function updateArrFinal(socket, updateType){
             item.type = ""
         })
     
-        let index = null
+        indexBinance = null
         
         arr.forEach(function(item){
-            index = arrBinance.map(o => o.price).indexOf(item.price)
-            arrBinance[index].vol = item.vol
-            arrBinance[index].type = item.type
+            indexBinance = arrBinance.map(o => o.price).indexOf(item.price)
+            arrBinance[indexBinance].vol = item.vol
+            arrBinance[indexBinance].type = item.type
         })
         
         for(i=1; i < arrBinance.length; i++){
@@ -258,19 +259,21 @@ function updateArrFinal(socket, updateType){
             }
         }
 
+        indexBinance = null
         arrTrades.forEach(function(item){
-            index = arrBinance.map(o => o.price).indexOf(item.price)
-            arrBinance[index].hit = item.hit
-            arrBinance[index].lift = item.lift
+            indexBinance = arrBinance.map(o => o.price).indexOf(item.price)
+            arrBinance[indexBinance].hit = item.hit
+            arrBinance[indexBinance].lift = item.lift
         })
 
     } else if(updateType == "trades"){
+        indexBinance = null
         arrTrades.forEach(function(item){
-            index = arrBinance.map(o => o.price).indexOf(item.price)
-            arrBinance[index].hit = item.hit
-            arrBinance[index].lift = item.lift
+            indexBinance = arrBinance.map(o => o.price).indexOf(item.price)
+            arrBinance[indexBinance].hit = item.hit
+            arrBinance[indexBinance].lift = item.lift
         })
     }
 
-    io.sockets.emit('push', arrBinance)
+    io.sockets.emit('pushBinance-eos', arrBinance)
 }
