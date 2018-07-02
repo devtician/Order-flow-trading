@@ -65,6 +65,7 @@ io.on('connection', function (socket) {
             bnbThreshUpper = precisionRound((bnbMid + 0.14), 2)
             bnbThreshLower = precisionRound((bnbMid - 0.14), 2)
             seedArrFinal()
+            console.log("after seed")
         }
 
         arr = []
@@ -180,7 +181,8 @@ wss.onmessage = (message) => {
             case chanId_trades:
                 let trades = btfx.updateTrades(response)
                 if(trades != null){
-                    io.sockets.emit("pushbtfx", trades)
+                    io.sockets.emit("pushbtfx", trades[0])
+                    io.sockets.emit("bitfinex-trades", trades[1])
                 }
             default:
                 console.log(response)

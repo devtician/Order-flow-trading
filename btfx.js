@@ -167,7 +167,6 @@ module.exports = function(){
                 roundedPricebtfx = precisionRound(response[2][3], 2)
                 respVol = Number(Math.round(response[2][2]))
 
-                io.sockets.emit("bitfinex-trades", {price: roundedPricebtfx, vol: respVol, time: response[2][1]})
 
                 let inde = arrTradesbtfx.map(o => o.price).indexOf(roundedPricebtfx)
 
@@ -189,7 +188,7 @@ module.exports = function(){
 
                 let trades = updateArrBitfinex("trades")
 
-                return trades
+                return [trades, { price: roundedPricebtfx, vol: respVol, time: response[2][1] }]
             }
         },
 

@@ -48,10 +48,18 @@ body {
 
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: 3.9rem repeat(20,min-content);
+            grid-template-rows: 3.9rem 1fr;
+            overflow:hidden;
+
+            .binance-trades {
+                grid-column: 1/-1;
+            }
+            .bitfinex-trades {
+                grid-column: 1/-1;
+            }
 
             .filter__input {
-                grid-column: 1/-1;
+                grid-column: 1/3;
                 text-align: center;
             }
 
