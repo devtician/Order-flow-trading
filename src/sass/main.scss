@@ -49,13 +49,19 @@ body {
 
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: 3.9rem 1fr;
+            grid-template-rows: 3.55rem 1fr;
             overflow:hidden;
 
             .binance-eos-trades {
                 grid-column: 1/-1;
             }
             .bitfinex-eos-trades {
+                grid-column: 1/-1;
+            }
+            .binance-btc-trades {
+                grid-column: 1/-1;
+            }
+            .bitfinex-btc-trades {
                 grid-column: 1/-1;
             }
 

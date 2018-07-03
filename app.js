@@ -19,30 +19,47 @@ var btfx = require("./btfx.js")
 const WebSocket = require("ws")
 const wss = new WebSocket("wss://api.bitfinex.com/ws/2")
 
-let chanId_EOSUSD
-let chanId_trades
+let chanId_EOSUSD_book
+let chanId_EOSUSD_trades
+let chanId_BTCUSD_book
+let chanId_BTCUSD_trades
 
 wss.onopen = () => init()
 
 function init(){
     wss.send(btfx.subscribeOrderbook("EOSUSD"))
+    wss.send(btfx.subscribeOrderbook("BTCUSD"))
     wss.send(btfx.subscribeTrades("EOSUSD"))
+    wss.send(btfx.subscribeTrades("BTCUSD"))
     // console.log("subscribed orderbook")
 }
 
 // BINANCE Variables
-var arrBinance = []
-var bnbUpper = null
-var bnbLower = null
-var bnbMid = null
-var bnbThreshUpper = null
-var bnbThreshLower = null
+var arrBinanceEos = []
+var bnbUpperEos = null
+var bnbLowerEos = null
+var bnbMidEos = null
+var bnbThreshUpperEos = null
+var bnbThreshLowerEos = null
 
-var arr = []
-var arrTrades = []
-var k = null
-var roundedPrice = null
-let indexBinance = null
+var arrEos = []
+var arrTradesEos = []
+var kEos = null
+var roundedPriceEos = null
+let indexBinanceEos = null
+
+var arrBinanceBtc = []
+var bnbUpperBtc = null
+var bnbLowerBtc = null
+var bnbMidBtc = null
+var bnbThreshUpperBtc = null
+var bnbThreshLowerBtc = null
+
+var arrBtc = []
+var arrTradesBtc = []
+var kBtc = null
+var roundedPriceBtc = null
+let indexBinanceBtc = null
 
 
 
@@ -59,18 +76,18 @@ io.on('connection', function (socket) {
         let bidVolumes = Object.values(bids)
         let askVolumes = Object.values(asks)
 
-        if(arrBinance.length == 0 || bestAsk > bnbThreshUpper || bestBid < bnbThreshLower){
-            bnbMid = precisionRound(((bestBid + bestAsk)/2), 2)
-            bnbUpper = precisionRound((bnbMid + 0.24), 2)
-            bnbLower = precisionRound((bnbMid - 0.24), 2)
-            bnbThreshUpper = precisionRound((bnbMid + 0.14), 2)
-            bnbThreshLower = precisionRound((bnbMid - 0.14), 2)
-            seedArrFinal()
+        if(arrBinanceEos.length == 0 || bestAsk > bnbThreshUpperEos || bestBid < bnbThreshLowerEos){
+            bnbMidEos = precisionRound(((bestBid + bestAsk)/2), 2)
+            bnbUpperEos = precisionRound((bnbMidEos + 0.24), 2)
+            bnbLowerEos = precisionRound((bnbMidEos - 0.24), 2)
+            bnbThreshUpperEos = precisionRound((bnbMidEos + 0.14), 2)
+            bnbThreshLowerEos = precisionRound((bnbMidEos - 0.14), 2)
+            seedArrFinalEos()
             console.log("after seed")
         }
 
-        arr = []
-        k = 0
+        arrEos = []
+        kEos = 0
 
         for (i = 0; i < askPrices.length; i++) {
             askPrices[i] = precisionRound(askPrices[i], 2)
@@ -82,77 +99,185 @@ io.on('connection', function (socket) {
 
         for (i = askPrices.length - 1; i > 0; i--) {
             if (askPrices[i] - askPrices[0] <= 0.14) {
-                if (arr.length == 0) {
-                    arr.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
+                if (arrEos.length == 0) {
+                    arrEos.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
                 } else {
                     if (askPrices[i] == askPrices[i + 1]) {
-                        arr[k].vol += askVolumes[i]
-                        arr[k].vol = Math.round(arr[k].vol)
+                        arrEos[kEos].vol += askVolumes[i]
+                        arrEos[kEos].vol = Math.round(arrEos[kEos].vol)
                     } else {
-                        arr.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
-                        k++
+                        arrEos.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
+                        kEos++
                     }
                 }
             }
         }
 
-        if (precisionRound(arr[k].price - bidPrices[0], 2) > 0.01) {
-            var numTimes = Math.round((arr[k].price - bidPrices[0])/0.01 - 1)
+        if (precisionRound(arrEos[kEos].price - bidPrices[0], 2) > 0.01) {
+            var numTimes = Math.round((arrEos[kEos].price - bidPrices[0])/0.01 - 1)
             for (i = 1; i <= numTimes ; i++ ){
-                arr.push({ vol: "", price: precisionRound((arr[k].price - i * 0.01), 2), type: "mid", hit: null, lift: null })
-                k++
+                arrEos.push({ vol: "", price: precisionRound((arrEos[kEos].price - i * 0.01), 2), type: "mid", hit: null, lift: null })
+                kEos++
             }
         }
 
         for (i = 0; i < bidPrices.length; i++) {
             if (bidPrices[0] - bidPrices[i] <= 0.14) {
-                if (arr[k].type != "bid") {
-                    arr.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
-                    k++
+                if (arrEos[kEos].type != "bid") {
+                    arrEos.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
+                    kEos++
                 } else {
                     if (bidPrices[i] == bidPrices[i - 1]) {
-                        arr[k].vol += bidVolumes[i]
-                        arr[k].vol = Math.round(arr[k].vol)
+                        arrEos[kEos].vol += bidVolumes[i]
+                        arrEos[kEos].vol = Math.round(arrEos[kEos].vol)
                     } else {
-                        arr.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
-                        k++
+                        arrEos.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
+                        kEos++
                     }
                 }
             }
         }
 
-        updateArrFinal(socket, "orderbook")
+        updateArrFinalEos(socket, "orderbook")
     })
 
     binance.websockets.trades(['EOSUSDT'], (trades) => {
         let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId, M:M} = trades;
         // console.log(trades)
         // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", m: "+maker+", M" + M);
-        roundedPrice = precisionRound(Number(price), 2)
-        // console.log(roundedPrice)
-        let index = arrTrades.map(o => o.price).indexOf(roundedPrice)
+        roundedPriceEos = precisionRound(Number(price), 2)
+        // console.log(roundedPriceBtc)
+        let index = arrTradesEos.map(o => o.price).indexOf(roundedPriceEos)
 
-        io.sockets.emit("binance-eos-trades", {price: roundedPrice, vol: quantity, time: eventTime, side: maker})
+        io.sockets.emit("binance-eos-trades", {price: roundedPriceEos, vol: quantity, time: eventTime, side: maker})
 
         if(index == -1){
             if(maker == true){
-                arrTrades.push({price: roundedPrice, hit: Math.round(Number(quantity)), lift: null})
+                arrTradesEos.push({price: roundedPriceEos, hit: Math.round(Number(quantity)), lift: null})
             } else {
-                arrTrades.push({price: roundedPrice, hit: null, lift: Math.round(Number(quantity))})
+                arrTradesEos.push({price: roundedPriceEos, hit: null, lift: Math.round(Number(quantity))})
             }
         } else {
             if(maker == true){
-                arrTrades[index].hit += Number(quantity)  
-                arrTrades[index].hit = Math.round(arrTrades[index].hit)
+                arrTradesEos[index].hit += Number(quantity)  
+                arrTradesEos[index].hit = Math.round(arrTradesEos[index].hit)
                 // console.log("the updated hit: ", arrTrades[index].hit)  
             } else {
-                arrTrades[index].lift += Number(quantity)  
-                arrTrades[index].lift = Math.round(arrTrades[index].lift)
+                arrTradesEos[index].lift += Number(quantity)  
+                arrTradesEos[index].lift = Math.round(arrTradesEos[index].lift)
                 // console.log("the updated lift: ", arrTrades[index].lift)    
             }
         }
         
-        updateArrFinal(socket, "trades")
+        updateArrFinalEos(socket, "trades")
+    })
+    
+    binance.websockets.depthCache(['BTCUSDT'], (symbol, depth) => {
+        let bids = binance.sortBids(depth.bids);
+        let asks = binance.sortAsks(depth.asks);
+
+        let bestBid = Math.round(Number(binance.first(bids)));
+        let bestAsk = Math.round(Number(binance.first(asks)));
+
+        let bidPrices = Object.keys(bids)
+        let askPrices = Object.keys(asks)
+        let bidVolumes = Object.values(bids)
+        let askVolumes = Object.values(asks)
+
+        if(arrBinanceBtc.length == 0 || bestAsk > bnbThreshUpperBtc || bestBid < bnbThreshLowerBtc){
+            bnbMidBtc = Math.round((bestBid + bestAsk)/2)
+            bnbUpperBtc = Math.round((bnbMidBtc + 24))
+            bnbLowerBtc = Math.round((bnbMidBtc - 24))
+            bnbThreshUpperBtc = Math.round((bnbMidBtc + 13))
+            bnbThreshLowerBtc = Math.round((bnbMidBtc - 13))
+            seedArrFinalBtc()
+            console.log("after seed")
+        }
+
+        arrBtc = []
+        kBtc = 0
+
+        for (i = 0; i < askPrices.length; i++) {
+            askPrices[i] = Math.round(askPrices[i])
+        }
+
+        for (i = 0; i < bidPrices.length; i++) {
+            bidPrices[i] = Math.round(bidPrices[i])
+        }
+
+        for (i = askPrices.length - 1; i > 0; i--) {
+            if (askPrices[i] - askPrices[0] <= 14) {
+                if (arrBtc.length == 0) {
+                    arrBtc.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
+                } else {
+                    if (askPrices[i] == askPrices[i + 1]) {
+                        arrBtc[kBtc].vol += askVolumes[i]
+                        arrBtc[kBtc].vol = Math.round(arrBtc[kBtc].vol)
+                    } else {
+                        arrBtc.push({ vol: Math.round(askVolumes[i]), price: askPrices[i], type: "ask", hit: null, lift: null})
+                        kBtc++
+                    }
+                }
+            }
+        }
+
+        if (Math.round(arrBtc[kBtc].price - bidPrices[0]) > 1) {
+            var numTimes = Math.round((arrBtc[kBtc].price - bidPrices[0]) - 1)
+            for (i = 1; i <= numTimes ; i++ ){
+                arrBtc.push({ vol: "", price: Math.round((arrBtc[kBtc].price - i)), type: "mid", hit: null, lift: null })
+                kBtc++
+            }
+        }
+
+        for (i = 0; i < bidPrices.length; i++) {
+            if (bidPrices[0] - bidPrices[i] <= 14) {
+                if (arrBtc[kBtc].type != "bid") {
+                    arrBtc.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
+                    kBtc++
+                } else {
+                    if (bidPrices[i] == bidPrices[i - 1]) {
+                        arrBtc[kBtc].vol += bidVolumes[i]
+                        arrBtc[kBtc].vol = Math.round(arrBtc[kBtc].vol)
+                    } else {
+                        arrBtc.push({ vol: Math.round(bidVolumes[i]), price: bidPrices[i], type: "bid", hit: null, lift: null})
+                        kBtc++
+                    }
+                }
+            }
+        }
+
+        updateArrFinalBtc(socket, "orderbook", bestBid, bestAsk)
+    })
+
+    binance.websockets.trades(['BTCUSDT'], (trades) => {
+        let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId, M:M} = trades;
+        // console.log(trades)
+        // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", m: "+maker+", M" + M);
+        roundedPriceBtc = Math.round(Number(price))
+        // console.log(roundedPriceBtc)
+        let index = arrTradesBtc.map(o => o.price).indexOf(roundedPriceBtc)
+
+        io.sockets.emit("binance-btc-trades", {price: roundedPriceBtc, vol: quantity, time: eventTime, side: maker})
+
+        if(index == -1){
+            if(maker == true){
+                arrTradesBtc.push({price: roundedPriceBtc, hit: precisionRound(Number(quantity), 4), lift: null})
+            } else {
+                arrTradesBtc.push({price: roundedPriceBtc, hit: null, lift: precisionRound(Number(quantity), 4)})
+            }
+        } else {
+            if(maker == true){
+                arrTradesBtc[index].hit += Number(quantity)  
+                arrTradesBtc[index].hit = precisionRound(arrTradesBtc[index].hit, 4)
+                // console.log("the updated hit: ", arrTrades[index].hit)  
+            } else {
+                arrTradesBtc[index].lift += Number(quantity)  
+                arrTradesBtc[index].lift = precisionRound(arrTradesBtc[index].lift, 4)
+                // console.log("the updated lift: ", arrTrades[index].lift)    
+            }
+        }
+        
+        updateArrFinalBtc(socket, "trades")
     })
 
     socket.on('response', function (data) {
@@ -166,25 +291,46 @@ wss.onmessage = (message) => {
 
     if(Array.isArray(response)){
         switch(response[0]){
-            case chanId_EOSUSD:
+            case chanId_EOSUSD_book:
                 if(response[1].length > 3 ){
                     // console.log("sending to snapshot")
-                    btfx.snapshotOrderbook(response)
+                    btfx.snapshotOrderbook(response, "eos")
                 } else {
                     // console.log("sending to updateorderbook")
-                    let array = btfx.updateOrderbook(response)
-                    if(array != null){
-                        io.sockets.emit("pushbtfx-eos", array)
+                    let arrayeos = btfx.updateOrderbook(response, "eos")
+                    if(arrayeos != null){
+                        io.sockets.emit("pushbtfx-eos", arrayeos)
                     }
                     // console.log("sent emit message")
                 }
                 break
-            case chanId_trades:
-                let trades = btfx.updateTrades(response)
-                if(trades != null){
-                    io.sockets.emit("pushbtfx-eos", trades[0])
-                    io.sockets.emit("bitfinex-eos-trades", trades[1])
+            case chanId_EOSUSD_trades:
+                let tradeseos = btfx.updateTradeseos(response)
+                if(tradeseos != null){
+                    io.sockets.emit("pushbtfx-eos", tradeseos[0])
+                    io.sockets.emit("bitfinex-eos-trades", tradeseos[1])
                 }
+                break    
+            case chanId_BTCUSD_book:
+                if(response[1].length > 3 ){
+                    // console.log("sending to snapshot")
+                    btfx.snapshotOrderbook(response, "btc")
+                } else {
+                    // console.log("sending to updateorderbook")
+                    let arraybtc = btfx.updateOrderbook(response, "btc")
+                    if(arraybtc != null){
+                        io.sockets.emit("pushbtfx-btc", arraybtc)
+                    }
+                    // console.log("sent emit message")
+                }
+                break
+            case chanId_BTCUSD_trades:
+                let tradesbtc = btfx.updateTradesbtc(response)
+                if(tradesbtc != null){
+                    io.sockets.emit("pushbtfx-btc", tradesbtc[0])
+                    io.sockets.emit("bitfinex-btc-trades", tradesbtc[1])
+                }
+                break 
             default:
                 console.log(response)
         }
@@ -195,11 +341,17 @@ wss.onmessage = (message) => {
         switch(event){
             case "subscribed":
                 if(channel == "book" && pair == "EOSUSD"){
-                    chanId_EOSUSD = response.chanId
-                    console.log("Book channel ID updated")
+                    chanId_EOSUSD_book = response.chanId
+                    console.log("EOSUSD Book channel ID updated")
                 } else if(channel == "trades" && pair == "EOSUSD"){
-                    chanId_trades = response.chanId
-                    console.log("Trades channel ID updated")
+                    chanId_EOSUSD_trades = response.chanId
+                    console.log("EOSUSD Trades channel ID updated")
+                } else if(channel == "book" && pair == "BTCUSD"){
+                    chanId_BTCUSD_book = response.chanId
+                    console.log("BTCUSD Book channel ID updated")
+                } else if(channel == "trades" && pair == "BTCUSD"){
+                    chanId_BTCUSD_trades = response.chanId
+                    console.log("BTCUSD Trades channel ID updated")
                 }
                 break
             case "info":
@@ -220,60 +372,144 @@ function precisionRound(number, precision) {
     return Math.round(number * factor) / factor;
 }
 
-function seedArrFinal(){
-    arrBinance = []
-    for( i = bnbUpper; i >= bnbLower; i -= 0.01 ){
-        arrBinance.push({vol: "", price: precisionRound(i, 2), type: "", hit: null, lift: null})
+function seedArrFinalEos(){
+    arrBinanceEos = []
+    for( i = bnbUpperEos; i >= bnbLowerEos; i -= 0.01 ){
+        arrBinanceEos.push({vol: "", price: precisionRound(i, 2), type: "", hit: null, lift: null})
+    }
+}
+function seedArrFinalBtc(){
+    arrBinanceBtc = []
+    for( i = bnbUpperBtc; i >= bnbLowerBtc; i -- ){
+        arrBinanceBtc.push({vol: "", price: Math.round(i), type: "", hit: null, lift: null})
     }
 }
 
-function updateArrFinal(socket, updateType){
+function updateArrFinalEos(socket, updateType){
     if(updateType == "orderbook"){
-        arrBinance.forEach(function(item){
+        arrBinanceEos.forEach(function(item){
             item.vol = ""
             item.type = ""
         })
     
-        indexBinance = null
+        indexBinanceEos = null
         
-        arr.forEach(function(item){
-            indexBinance = arrBinance.map(o => o.price).indexOf(item.price)
-            arrBinance[indexBinance].vol = item.vol
-            arrBinance[indexBinance].type = item.type
+        arrEos.forEach(function(item){
+            indexBinanceEos = arrBinanceEos.map(o => o.price).indexOf(item.price)
+            if (indexBinanceEos != -1){
+                arrBinanceEos[indexBinanceEos].vol = item.vol
+                arrBinanceEos[indexBinanceEos].type = item.type
+            }
         })
         
-        for(i=1; i < arrBinance.length; i++){
-            if(arrBinance[(i-1)].type == "ask" && arrBinance[(i+1)].type == "ask" && arrBinance[i].type == ""){
-                arrBinance[i].type = "ask"
-                arrBinance[i].vol = "0"
-            } else if(arrBinance[(i-1)].type == "bid" && arrBinance[(i+1)].type == "bid" && arrBinance[i].type == ""){
-                arrBinance[i].type = "bid"
-                arrBinance[i].vol = "0"
+        for(i=1; i < arrBinanceEos.length; i++){
+            if(arrBinanceEos[(i-1)].type == "ask" && arrBinanceEos[(i+1)].type == "ask" && arrBinanceEos[i].type == ""){
+                arrBinanceEos[i].type = "ask"
+                arrBinanceEos[i].vol = "0"
+            } else if(arrBinanceEos[(i+1)] == undefined) {
+                break
+            } else if(arrBinanceEos[(i-1)].type == "bid" && arrBinanceEos[(i+1)].type == "bid" && arrBinanceEos[i].type == ""){
+                arrBinanceEos[i].type = "bid"
+                arrBinanceEos[i].vol = "0"
             }
         }
-        for(i=0; i < arrBinance.length; i++){
-            if(arrBinance[i].type == ""){
-                arrBinance[i].type = "ask"
+        for(i=0; i < arrBinanceEos.length; i++){
+            if(arrBinanceEos[i].type == ""){
+                arrBinanceEos[i].type = "ask"
             } else {
                 break
             }
         }
 
-        indexBinance = null
-        arrTrades.forEach(function(item){
-            indexBinance = arrBinance.map(o => o.price).indexOf(item.price)
-            arrBinance[indexBinance].hit = item.hit
-            arrBinance[indexBinance].lift = item.lift
+        indexBinanceEos = null
+        arrTradesEos.forEach(function(item){
+            indexBinanceEos = arrBinanceEos.map(o => o.price).indexOf(item.price)
+            if (indexBinanceEos != -1){
+            arrBinanceEos[indexBinanceEos].hit = item.hit
+            arrBinanceEos[indexBinanceEos].lift = item.lift
+            }
         })
 
     } else if(updateType == "trades"){
-        indexBinance = null
-        arrTrades.forEach(function(item){
-            indexBinance = arrBinance.map(o => o.price).indexOf(item.price)
-            arrBinance[indexBinance].hit = item.hit
-            arrBinance[indexBinance].lift = item.lift
+        indexBinanceEos = null
+        arrTradesEos.forEach(function(item){
+            indexBinanceEos = arrBinanceEos.map(o => o.price).indexOf(item.price)
+            if (indexBinanceEos != -1){
+            arrBinanceEos[indexBinanceEos].hit = item.hit
+            arrBinanceEos[indexBinanceEos].lift = item.lift
+            }
         })
     }
 
-    io.sockets.emit('pushBinance-eos', arrBinance)
+    io.sockets.emit('pushBinance-eos', arrBinanceEos)
+}
+
+function updateArrFinalBtc(socket, updateType, bestBid, bestAsk){
+    if(updateType == "orderbook"){
+        arrBinanceBtc.forEach(function(item){
+            item.vol = ""
+            item.type = ""
+        })
+    
+        indexBinanceBtc = null
+        
+        arrBtc.forEach(function(item){
+            indexBinanceBtc = arrBinanceBtc.map(o => o.price).indexOf(item.price)
+            if (indexBinanceBtc != -1){
+                arrBinanceBtc[indexBinanceBtc].vol = item.vol
+                arrBinanceBtc[indexBinanceBtc].type = item.type
+            }
+        })
+        
+        for(i = 0; i < arrBinanceBtc.length; i++){
+            if(arrBinanceBtc[i].price >= bestAsk){
+                arrBinanceBtc[i].type = "ask"
+            } else if(arrBinanceBtc[i].price < bestAsk && arrBinanceBtc[i].price > bestBid){
+                arrBinanceBtc[i].type = "mid"
+            } else {
+                arrBinanceBtc[i].type = "bid"
+            }
+        }
+
+
+        // for(i=1; i < arrBinanceBtc.length; i++){
+        //     if(arrBinanceBtc[(i-1)].type == "ask" && arrBinanceBtc[(i+1)].type == "ask" && arrBinanceBtc[i].type == ""){
+        //         arrBinanceBtc[i].type = "ask"
+        //         arrBinanceBtc[i].vol = "0"
+        //     } else if(arrBinanceBtc[(i+1)] == undefined) {
+        //         break
+        //     } else if(arrBinanceBtc[(i-1)].type == "bid" && arrBinanceBtc[(i+1)].type == "bid" && arrBinanceBtc[i].type == ""){
+        //         arrBinanceBtc[i].type = "bid"
+        //         arrBinanceBtc[i].vol = "0"
+        //     }
+        // }
+        // for(i=0; i < arrBinanceBtc.length; i++){
+        //     if(arrBinanceBtc[i].type == ""){
+        //         arrBinanceBtc[i].type = "ask"
+        //     } else {
+        //         break
+        //     }
+        // }
+
+        indexBinanceBtc = null
+        arrTradesBtc.forEach(function(item){
+            indexBinanceBtc = arrBinanceBtc.map(o => o.price).indexOf(item.price)
+            if (indexBinanceBtc != -1){
+                arrBinanceBtc[indexBinanceBtc].hit = item.hit
+                arrBinanceBtc[indexBinanceBtc].lift = item.lift
+            }
+        })
+
+    } else if(updateType == "trades"){
+        indexBinanceBtc = null
+        arrTradesBtc.forEach(function(item){
+            indexBinanceBtc = arrBinanceBtc.map(o => o.price).indexOf(item.price)
+            if (indexBinanceBtc != -1){
+                arrBinanceBtc[indexBinanceBtc].hit = item.hit
+                arrBinanceBtc[indexBinanceBtc].lift = item.lift
+            }
+        })
+    }
+
+    io.sockets.emit('pushBinance-btc', arrBinanceBtc)
 }

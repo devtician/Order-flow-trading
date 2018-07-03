@@ -87,7 +87,7 @@ socket.on('binance-eos-trades', function (data) {
     // Clone the new row and insert it into the table
     var tb = document.querySelector(".binance-eos-trades");
 
-    while (tb.childElementCount >= 46) {
+    while (tb.childElementCount >= 58) {
         tb.removeChild(tb.lastChild)
     }
 
@@ -114,7 +114,7 @@ socket.on('bitfinex-eos-trades', function (data) {
     // Clone the new row and insert it into the table
     var tb = document.querySelector(".bitfinex-eos-trades");
 
-    while (tb.childElementCount >= 46) {
+    while (tb.childElementCount >= 58) {
         tb.removeChild(tb.lastChild)
     }
 
@@ -150,6 +150,7 @@ function resetBitfinexEosFilter(){
 }
 
 socket.on('pushBinance-btc', function (data) {
+    console.log(data)
     var binance = document.getElementById("prices-btc-binance");
     while (binance.firstChild) {
         binance.removeChild(binance.firstChild);
@@ -170,15 +171,15 @@ socket.on('pushBinance-btc', function (data) {
         price = clone.querySelector(".row__price");
         sold = clone.querySelector(".sold");
         bought = clone.querySelector(".bought");
-        if (data[i].vol != "") {
+        if (data[i].vol.toLocaleString() != "" && Math.round(data[i].vol) != 0) {
             vol.textContent = Number(data[i].vol).toLocaleString();
         }
         price.textContent = data[i].price;
         if (data[i].hit != null) {
-            sold.textContent = Number(data[i].hit).toLocaleString();
+            sold.textContent = Math.round(Number(data[i].hit)).toLocaleString();
         }
         if (data[i].lift != null) {
-            bought.textContent = Number(data[i].lift).toLocaleString();
+            bought.textContent = Math.round(Number(data[i].lift)).toLocaleString();
         }
         tb.appendChild(clone);
     }
@@ -207,15 +208,15 @@ socket.on('pushbtfx-btc', function (data) {
         price = clone.querySelector(".row__price");
         sold = clone.querySelector(".sold");
         bought = clone.querySelector(".bought");
-        if (data[i].vol != "") {
+        if (data[i].vol.toLocaleString() != "") {
             vol.textContent = Number(data[i].vol).toLocaleString();
         }
         price.textContent = data[i].price;
         if (data[i].hit != null) {
-            sold.textContent = Number(data[i].hit).toLocaleString();
+            sold.textContent = Math.round(Number(data[i].hit)).toLocaleString();
         }
         if (data[i].lift != null) {
-            bought.textContent = Number(data[i].lift).toLocaleString();
+            bought.textContent = Math.round(Number(data[i].lift)).toLocaleString();
         }
         tb.appendChild(clone);
     }
@@ -228,7 +229,7 @@ socket.on('binance-btc-trades', function (data) {
     // Clone the new row and insert it into the table
     var tb = document.querySelector(".binance-btc-trades");
 
-    while (tb.childElementCount >= 46) {
+    while (tb.childElementCount >= 58) {
         tb.removeChild(tb.lastChild)
     }
 
@@ -240,7 +241,7 @@ socket.on('binance-btc-trades', function (data) {
     vol = clone.querySelector(".row__volume");
     price = clone.querySelector(".row__price");
     time = clone.querySelector(".row__time");
-    vol.textContent = Math.round(Number(data.vol)).toLocaleString();
+    vol.textContent = Number(data.vol).toLocaleString();
     var date = new Date(data.time);
     time.textContent = date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     price.textContent = data.price;
@@ -255,7 +256,7 @@ socket.on('bitfinex-btc-trades', function (data) {
     // Clone the new row and insert it into the table
     var tb = document.querySelector(".bitfinex-btc-trades");
 
-    while (tb.childElementCount >= 46) {
+    while (tb.childElementCount >= 58) {
         tb.removeChild(tb.lastChild)
     }
 
