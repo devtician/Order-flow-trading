@@ -41,6 +41,9 @@ var respVolbtc = null
 var indexbtc = null
 // var btcupdate = true
 
+var adjust = require("./decimalAdjust.js")
+
+
 module.exports = function(){
     return {
         snapshotOrderbook: function(response, cur){
@@ -144,11 +147,11 @@ module.exports = function(){
                     asksNewbtc = []
                     
                     for( i = 0; i < asksbtc.length; i++){
-                        asksNewbtc.push({volume: Number(asksbtc[i].volume), price: Math.round(asksbtc[i].price)})
+                        asksNewbtc.push({volume: Number(asksbtc[i].volume), price: Math.ceil(asksbtc[i].price)})
                     }
                     
                     for( i = 0; i < bidsbtc.length; i++){
-                        bidsNewbtc.push({volume: Number(bidsbtc[i].volume), price: Math.round(bidsbtc[i].price)})
+                        bidsNewbtc.push({volume: Number(bidsbtc[i].volume), price: Math.floor(bidsbtc[i].price)})
                     }
                     
                     // console.log("asksNew\n", asksNew)
@@ -171,10 +174,10 @@ module.exports = function(){
                         }
                     }
     
-                    if (Math.round(bestbtc.askPrice - bestbtc.bidPrice) > 1){
-                        var numTimes = Math.round((bestbtc.askPrice - bestbtc.bidPrice) - 1)
+                    if (Math.round(Math.ceil(bestbtc.askPrice) - Math.floor(bestbtc.bidPrice)) > 1){
+                        var numTimes = Math.round((Math.ceil(bestbtc.askPrice) - Math.floor(bestbtc.bidPrice)) - 1)
                         for(i = 1; i <= numTimes; i++){
-                            arrbtfxbtc.push({vol: "", price: Math.round(bestbtc.askPrice - i), type: "mid", hit: null, lift: null})
+                            arrbtfxbtc.push({vol: "", price: Math.ceil(bestbtc.askPrice - i), type: "mid", hit: null, lift: null})
                         }
                         jbtc++
                     }
@@ -200,7 +203,7 @@ module.exports = function(){
                     // console.log("***********************")
                     // console.log(arrbtfx)
                     // console.log("***********************")
-                    let arraybtc = updateArrBitfinexbtc("orderbook")
+                    let arraybtc = updateArrBitfinexbtc("orderbook", Math.floor(bestbtc.bidPrice), Math.ceil(bestbtc.askPrice))
     
                     return arraybtc
                 }
@@ -259,11 +262,11 @@ module.exports = function(){
                     asksNeweos = []
                     
                     for( i = 0; i < askseos.length; i++){
-                        asksNeweos.push({volume: Number(askseos[i].volume), price: precisionRound(askseos[i].price, 2)})
+                        asksNeweos.push({volume: Number(askseos[i].volume), price: adjust.ceil(askseos[i].price, -2)})
                     }
                     
                     for( i = 0; i < bidseos.length; i++){
-                        bidsNeweos.push({volume: Number(bidseos[i].volume), price: precisionRound(bidseos[i].price, 2)})
+                        bidsNeweos.push({volume: Number(bidseos[i].volume), price: adjust.floor(bidseos[i].price, -2)})
                     }
                     
                     // console.log("asksNew\n", asksNew)
@@ -286,10 +289,10 @@ module.exports = function(){
                         }
                     }
     
-                    if (precisionRound(besteos.askPrice - besteos.bidPrice, 2) > 0.01){
-                        var numTimes = Math.round((besteos.askPrice - besteos.bidPrice)/0.01 - 1)
+                    if (precisionRound(adjust.ceil(besteos.askPrice, -2) - adjust.floor(besteos.bidPrice, -2), 2) > 0.01){
+                        var numTimes = Math.round(precisionRound(adjust.ceil(besteos.askPrice, -2) - adjust.floor(besteos.bidPrice, -2), 2)/0.01 - 1)
                         for(i = 1; i <= numTimes; i++){
-                            arrbtfxeos.push({vol: "", price: precisionRound((besteos.askPrice - i * 0.01), 2), type: "mid", hit: null, lift: null})
+                            arrbtfxeos.push({vol: "", price: precisionRound((adjust.ceil(besteos.askPrice, -2) - i * 0.01), 2), type: "mid", hit: null, lift: null})
                         }
                         jeos++
                     }
@@ -315,7 +318,7 @@ module.exports = function(){
                     // console.log("***********************")
                     // console.log(arrbtfx)
                     // console.log("***********************")
-                    let array = updateArrBitfinex("orderbook")
+                    let array = updateArrBitfinex("orderbook", adjust.floor(besteos.bidPrice, -2), adjust.ceil(besteos.askPrice, -2))
     
                     return array
                 }
@@ -459,7 +462,7 @@ function seedArrFinalbtc(){
     }
 }
 
-function updateArrBitfinex(updateType){
+function updateArrBitfinex(updateType, bestBid, bestAsk){
     if(updateType == "orderbook"){
         arrBitfinexeos.forEach(function(item){
             item.vol = ""
@@ -475,25 +478,35 @@ function updateArrBitfinex(updateType){
                 arrBitfinexeos[indexeos].type = item.type
             }
         })
-        
-        for(i=1; i < arrBitfinexeos.length; i++){
-            if(arrBitfinexeos[(i-1)].type == "ask" && arrBitfinexeos[(i+1)].type == "ask" && arrBitfinexeos[i].type == ""){
+
+        for(i = 0; i < arrBitfinexeos.length; i++){
+            if(arrBitfinexeos[i].price >= bestAsk){
                 arrBitfinexeos[i].type = "ask"
-                arrBitfinexeos[i].vol = "0"
-            } else if(arrBitfinexeos[(i+1)] == undefined) {
-                break
-            } else if(arrBitfinexeos[(i-1)].type == "bid" && arrBitfinexeos[(i+1)].type == "bid" && arrBitfinexeos[i].type == ""){
-                arrBitfinexeos[i].type = "bid"
-                arrBitfinexeos[i].vol = "0"
-            }
-        }
-        for(i=0; i < arrBitfinexeos.length; i++){
-            if(arrBitfinexeos[i].type == ""){
-                arrBitfinexeos[i].type = "ask"
+            } else if(arrBitfinexeos[i].price < bestAsk && arrBitfinexeos[i].price > bestBid){
+                arrBitfinexeos[i].type = "mid"
             } else {
-                break
+                arrBitfinexeos[i].type = "bid"
             }
         }
+        
+        // for(i=1; i < arrBitfinexeos.length; i++){
+        //     if(arrBitfinexeos[(i-1)].type == "ask" && arrBitfinexeos[(i+1)].type == "ask" && arrBitfinexeos[i].type == ""){
+        //         arrBitfinexeos[i].type = "ask"
+        //         arrBitfinexeos[i].vol = "0"
+        //     } else if(arrBitfinexeos[(i+1)] == undefined) {
+        //         break
+        //     } else if(arrBitfinexeos[(i-1)].type == "bid" && arrBitfinexeos[(i+1)].type == "bid" && arrBitfinexeos[i].type == ""){
+        //         arrBitfinexeos[i].type = "bid"
+        //         arrBitfinexeos[i].vol = "0"
+        //     }
+        // }
+        // for(i=0; i < arrBitfinexeos.length; i++){
+        //     if(arrBitfinexeos[i].type == ""){
+        //         arrBitfinexeos[i].type = "ask"
+        //     } else {
+        //         break
+        //     }
+        // }
 
         indexeos = null
         arrTradesbtfxeos.forEach(function(item){
@@ -520,7 +533,7 @@ function updateArrBitfinex(updateType){
     // io.sockets.emit('pushbtfx', arrBitfinex)
 }
 
-function updateArrBitfinexbtc(updateType){
+function updateArrBitfinexbtc(updateType, bestBid, bestAsk){
     if(updateType == "orderbook"){
         arrBitfinexbtc.forEach(function(item){
             item.vol = ""
@@ -536,25 +549,43 @@ function updateArrBitfinexbtc(updateType){
                 arrBitfinexbtc[indexbtc].type = item.type
             }
         })
-        
-        for(i=1; i < arrBitfinexbtc.length; i++){
-            if(arrBitfinexbtc[(i-1)].type == "ask" && arrBitfinexbtc[(i+1)].type == "ask" && arrBitfinexbtc[i].type == ""){
+
+        // console.log("before")
+        for(i = 0; i < arrBitfinexbtc.length; i++){
+            // console.log("******************")
+            // console.log("bestbid", bestBid)
+            // console.log("bestask", bestAsk)
+            // console.log("price", arrBitfinexbtc[i].price)
+            if(arrBitfinexbtc[i].price >= bestAsk){
                 arrBitfinexbtc[i].type = "ask"
-                arrBitfinexbtc[i].vol = "0"
-            } else if(arrBitfinexbtc[(i+1)] == undefined) {
-                break
-            } else if(arrBitfinexbtc[(i-1)].type == "bid" && arrBitfinexbtc[(i+1)].type == "bid" && arrBitfinexbtc[i].type == ""){
-                arrBitfinexbtc[i].type = "bid"
-                arrBitfinexbtc[i].vol = "0"
-            }
-        }
-        for(i=0; i < arrBitfinexbtc.length; i++){
-            if(arrBitfinexbtc[i].type == ""){
-                arrBitfinexbtc[i].type = "ask"
+            } else if(arrBitfinexbtc[i].price < bestAsk && arrBitfinexbtc[i].price > bestBid){
+                arrBitfinexbtc[i].type = "mid"
             } else {
-                break
+                arrBitfinexbtc[i].type = "bid"
             }
+            // console.log("type", arrBitfinexbtc[i].type)
+            // console.log("******************")
         }
+        // console.log("after")
+        
+        // for(i=1; i < arrBitfinexbtc.length; i++){
+        //     if(arrBitfinexbtc[(i-1)].type == "ask" && arrBitfinexbtc[(i+1)].type == "ask" && arrBitfinexbtc[i].type == ""){
+        //         arrBitfinexbtc[i].type = "ask"
+        //         arrBitfinexbtc[i].vol = "0"
+        //     } else if(arrBitfinexbtc[(i+1)] == undefined) {
+        //         break
+        //     } else if(arrBitfinexbtc[(i-1)].type == "bid" && arrBitfinexbtc[(i+1)].type == "bid" && arrBitfinexbtc[i].type == ""){
+        //         arrBitfinexbtc[i].type = "bid"
+        //         arrBitfinexbtc[i].vol = "0"
+        //     }
+        // }
+        // for(i=0; i < arrBitfinexbtc.length; i++){
+        //     if(arrBitfinexbtc[i].type == ""){
+        //         arrBitfinexbtc[i].type = "ask"
+        //     } else {
+        //         break
+        //     }
+        // }
 
         indexbtc = null
         arrTradesbtfxbtc.forEach(function(item){

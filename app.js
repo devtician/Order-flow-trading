@@ -4,6 +4,8 @@ var app = express()
 var server = require('http').Server(app);
 var io = require('socket.io')(server, { 'pingTimeout': 7000 , 'pingInterval': 1000});
 var binance = require("node-binance-api");
+var adjust = require("./decimalAdjust.js")
+
 
 app.set('view engine', "ejs")
 app.use(express.static(__dirname, +"/build/public"))
@@ -90,11 +92,11 @@ io.on('connection', function (socket) {
         kEos = 0
 
         for (i = 0; i < askPrices.length; i++) {
-            askPrices[i] = precisionRound(askPrices[i], 2)
+            askPrices[i] = adjust.ceil(askPrices[i], -2)
         }
 
         for (i = 0; i < bidPrices.length; i++) {
-            bidPrices[i] = precisionRound(bidPrices[i], 2)
+            bidPrices[i] = adjust.floor(bidPrices[i], -2)
         }
 
         for (i = askPrices.length - 1; i > 0; i--) {
@@ -138,7 +140,7 @@ io.on('connection', function (socket) {
             }
         }
 
-        updateArrFinalEos(socket, "orderbook")
+        updateArrFinalEos(socket, "orderbook", adjust.floor(bestBid, -2), adjust.ceil(bestAsk, -2))
     })
 
     binance.websockets.trades(['EOSUSDT'], (trades) => {
@@ -198,11 +200,11 @@ io.on('connection', function (socket) {
         kBtc = 0
 
         for (i = 0; i < askPrices.length; i++) {
-            askPrices[i] = Math.round(askPrices[i])
+            askPrices[i] = Math.ceil(askPrices[i])
         }
 
         for (i = 0; i < bidPrices.length; i++) {
-            bidPrices[i] = Math.round(bidPrices[i])
+            bidPrices[i] = Math.floor(bidPrices[i])
         }
 
         for (i = askPrices.length - 1; i > 0; i--) {
@@ -246,7 +248,7 @@ io.on('connection', function (socket) {
             }
         }
 
-        updateArrFinalBtc(socket, "orderbook", bestBid, bestAsk)
+        updateArrFinalBtc(socket, "orderbook", adjust.floor(bestBid), adjust.ceil(bestAsk))
     })
 
     binance.websockets.trades(['BTCUSDT'], (trades) => {
@@ -385,7 +387,7 @@ function seedArrFinalBtc(){
     }
 }
 
-function updateArrFinalEos(socket, updateType){
+function updateArrFinalEos(socket, updateType, bestBid, bestAsk){
     if(updateType == "orderbook"){
         arrBinanceEos.forEach(function(item){
             item.vol = ""
@@ -402,24 +404,34 @@ function updateArrFinalEos(socket, updateType){
             }
         })
         
-        for(i=1; i < arrBinanceEos.length; i++){
-            if(arrBinanceEos[(i-1)].type == "ask" && arrBinanceEos[(i+1)].type == "ask" && arrBinanceEos[i].type == ""){
+        for(i = 0; i < arrBinanceEos.length; i++){
+            if(arrBinanceEos[i].price >= bestAsk){
                 arrBinanceEos[i].type = "ask"
-                arrBinanceEos[i].vol = "0"
-            } else if(arrBinanceEos[(i+1)] == undefined) {
-                break
-            } else if(arrBinanceEos[(i-1)].type == "bid" && arrBinanceEos[(i+1)].type == "bid" && arrBinanceEos[i].type == ""){
-                arrBinanceEos[i].type = "bid"
-                arrBinanceEos[i].vol = "0"
-            }
-        }
-        for(i=0; i < arrBinanceEos.length; i++){
-            if(arrBinanceEos[i].type == ""){
-                arrBinanceEos[i].type = "ask"
+            } else if(arrBinanceEos[i].price < bestAsk && arrBinanceEos[i].price > bestBid){
+                arrBinanceEos[i].type = "mid"
             } else {
-                break
+                arrBinanceEos[i].type = "bid"
             }
         }
+
+        // for(i=1; i < arrBinanceEos.length; i++){
+        //     if(arrBinanceEos[(i-1)].type == "ask" && arrBinanceEos[(i+1)].type == "ask" && arrBinanceEos[i].type == ""){
+        //         arrBinanceEos[i].type = "ask"
+        //         arrBinanceEos[i].vol = "0"
+        //     } else if(arrBinanceEos[(i+1)] == undefined) {
+        //         break
+        //     } else if(arrBinanceEos[(i-1)].type == "bid" && arrBinanceEos[(i+1)].type == "bid" && arrBinanceEos[i].type == ""){
+        //         arrBinanceEos[i].type = "bid"
+        //         arrBinanceEos[i].vol = "0"
+        //     }
+        // }
+        // for(i=0; i < arrBinanceEos.length; i++){
+        //     if(arrBinanceEos[i].type == ""){
+        //         arrBinanceEos[i].type = "ask"
+        //     } else {
+        //         break
+        //     }
+        // }
 
         indexBinanceEos = null
         arrTradesEos.forEach(function(item){
