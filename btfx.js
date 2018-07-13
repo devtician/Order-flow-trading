@@ -327,8 +327,12 @@ module.exports = function(){
 
         updateTradeseos: function(response){
             if(response[1] == "te"){
-                roundedPricebtfxeos = precisionRound(response[2][3], 2)
                 respVoleos = Number(Math.round(response[2][2]))
+                if(respVoleos > 0){
+                    roundedPricebtfxeos = adjust.ceil(response[2][3], -2)
+                } else {
+                    roundedPricebtfxeos = adjust.floor(response[2][3], -2)
+                }
 
 
                 let inde = arrTradesbtfxeos.map(o => o.price).indexOf(roundedPricebtfxeos)
@@ -357,8 +361,12 @@ module.exports = function(){
 
         updateTradesbtc: function(response){
             if(response[1] == "te"){
-                roundedPricebtfxbtc = Math.round(response[2][3])
                 respVolbtc = precisionRound(Number(response[2][2]), 4)
+                if(respVolbtc > 0){
+                    roundedPricebtfxbtc = Math.ceil(response[2][3])
+                } else {
+                    roundedPricebtfxbtc = Math.floor(response[2][3])
+                }
 
 
                 let inde = arrTradesbtfxbtc.map(o => o.price).indexOf(roundedPricebtfxbtc)

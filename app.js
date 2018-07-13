@@ -147,7 +147,11 @@ io.on('connection', function (socket) {
         let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId, M:M} = trades;
         // console.log(trades)
         // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", m: "+maker+", M" + M);
-        roundedPriceEos = precisionRound(Number(price), 2)
+        if(maker == true){
+            roundedPriceEos = adjust.floor(Number(price), -2)
+        } else {
+            roundedPriceEos = adjust.ceil(Number(price), -2)
+        }
         // console.log(roundedPriceBtc)
         let index = arrTradesEos.map(o => o.price).indexOf(roundedPriceEos)
 
@@ -255,7 +259,12 @@ io.on('connection', function (socket) {
         let {e:eventType, E:eventTime, s:symbol, p:price, q:quantity, m:maker, a:tradeId, M:M} = trades;
         // console.log(trades)
         // console.log(symbol+" trade update. price: "+price+", quantity: "+quantity+", m: "+maker+", M" + M);
-        roundedPriceBtc = Math.round(Number(price))
+
+        if(maker == true){
+            roundedPriceBtc = Math.floor(Number(price))
+        } else {
+            roundedPriceBtc = Math.ceil(Number(price))
+        }
         // console.log(roundedPriceBtc)
         let index = arrTradesBtc.map(o => o.price).indexOf(roundedPriceBtc)
 
