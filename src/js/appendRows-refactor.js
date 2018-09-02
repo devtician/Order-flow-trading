@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost:3001');
+var socket = io.connect('http://localhost:3000');
 
 // Instantiate the table with the existing HTML tbody
 // and the row with the template
@@ -44,7 +44,7 @@ socket.on('pushBinance-eos', function (data) {
 
     socket.emit('response', "success");
 });
-socket.on('pushbtfx-eos', function (data) {
+socket.on('update-btfx-EOSUSD-cup', function (data) {
     // console.log(data)
     var bitfinex = document.getElementById("prices-eos-bitfinex");
     while (bitfinex.firstChild) {
@@ -108,7 +108,7 @@ socket.on('binance-eos-trades', function (data) {
     }
     socket.emit('response', "success");
 });
-socket.on('bitfinex-eos-trades', function (data) {
+socket.on('update-btfx-EOSUSD-trades', function (data) {
     // console.log(data)
 
     // Clone the new row and insert it into the table
@@ -150,7 +150,7 @@ function resetBitfinexEosFilter(){
 }
 
 socket.on('pushBinance-btc', function (data) {
-    // console.log(data)
+    console.log(data)
     var binance = document.getElementById("prices-btc-binance");
     while (binance.firstChild) {
         binance.removeChild(binance.firstChild);
@@ -186,7 +186,7 @@ socket.on('pushBinance-btc', function (data) {
 
     socket.emit('response', "success");
 });
-socket.on('pushbtfx-btc', function (data) {
+socket.on('update-btfx-BTCUSD-cup', function (data) {
     // console.log(data)
     var bitfinex = document.getElementById("prices-btc-bitfinex");
     while (bitfinex.firstChild) {
@@ -250,7 +250,7 @@ socket.on('binance-btc-trades', function (data) {
     }
     socket.emit('response', "success");
 });
-socket.on('bitfinex-btc-trades', function (data) {
+socket.on('update-btfx-BTCUSD-trades', function (data) {
     // console.log(data)
 
     // Clone the new row and insert it into the table

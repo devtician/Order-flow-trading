@@ -174,14 +174,17 @@ module.exports = function(){
                         }
                     }
     
+                    // console.log(Math.round(Math.ceil(bestbtc.askPrice) - Math.floor(bestbtc.bidPrice)), 'BTC if')
                     if (Math.round(Math.ceil(bestbtc.askPrice) - Math.floor(bestbtc.bidPrice)) > 1){
                         var numTimes = Math.round((Math.ceil(bestbtc.askPrice) - Math.floor(bestbtc.bidPrice)) - 1)
+                        // console.log(numTimes, "BTC")
                         for(i = 1; i <= numTimes; i++){
                             arrbtfxbtc.push({vol: "", price: Math.ceil(bestbtc.askPrice - i), type: "mid", hit: null, lift: null})
                         }
                         jbtc++
                     }
     
+                    // console.log(arrbtfxbtc, jbtc)
                     for(i = 0; i < bidsNewbtc.length; i++ ){
                         if(bestbtc.bidPrice - bidsNewbtc[i].price <= 14){
                             if(arrbtfxbtc[jbtc].type != "bid"){
@@ -277,7 +280,7 @@ module.exports = function(){
                             if(arrbtfxeos.length == 0){
                                 arrbtfxeos.push({vol: Math.round(asksNeweos[i].volume), price: asksNeweos[i].price, type: "ask", hit: null, lift: null})
                             } else {
-                                let index = arrbtfxeos.map(o => o.price).indexOf(asksNeweos[i].price) 
+                                let index = arrbtfxeos.map(o => o.price).indexOf(asksNeweos[i].price)
                                 if(index != -1){
                                     arrbtfxeos[index].vol += asksNeweos[i].volume
                                     arrbtfxeos[index].vol = Math.round(arrbtfxeos[index].vol) 
@@ -289,8 +292,10 @@ module.exports = function(){
                         }
                     }
     
+                    // console.log(precisionRound(adjust.ceil(besteos.askPrice, -2) - adjust.floor(besteos.bidPrice, -2), 2), 'EOS if')
                     if (precisionRound(adjust.ceil(besteos.askPrice, -2) - adjust.floor(besteos.bidPrice, -2), 2) > 0.01){
                         var numTimes = Math.round(precisionRound(adjust.ceil(besteos.askPrice, -2) - adjust.floor(besteos.bidPrice, -2), 2)/0.01 - 1)
+                        // console.log(numTimes, "EOS")
                         for(i = 1; i <= numTimes; i++){
                             arrbtfxeos.push({vol: "", price: precisionRound((adjust.ceil(besteos.askPrice, -2) - i * 0.01), 2), type: "mid", hit: null, lift: null})
                         }
