@@ -151,7 +151,7 @@ class Currency {
                 this.upper = round((this.mid + (24 / Math.pow(10, this.numsAfterDecimal.cup))), -this.numsAfterDecimal.cup)
                 this.lower = round((this.mid - (24 / Math.pow(10, this.numsAfterDecimal.cup))), -this.numsAfterDecimal.cup)
                 this.threshUpper = round((this.mid + (14 / Math.pow(10, this.numsAfterDecimal.cup))), -this.numsAfterDecimal.cup)
-                this.threshUpper = round((this.mid - (14 / Math.pow(10, this.numsAfterDecimal.cup))), -this.numsAfterDecimal.cup)
+                this.threshLower = round((this.mid - (14 / Math.pow(10, this.numsAfterDecimal.cup))), -this.numsAfterDecimal.cup)
                 this.seedCup()
             }
 
