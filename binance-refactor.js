@@ -33,21 +33,37 @@ class Currency {
         }
         return this.cup
     }
-    sortBids(data) {
-        let object = {}
-        let sortedKeys = Object.keys(data).sort((a,b)=>parseFloat(b)-parseFloat(a))
-        for (let price of sortedKeys) {
-            object[price] = parseFloat(data[price])
+    sortBids(symbol, max = Infinity, baseValue = false) {
+        let object = {}, count = 0, cache;
+        if (typeof symbol === 'object') cache = symbol;
+        else cache = getDepthCache(symbol).bids;
+        let sorted = Object.keys(cache).sort(function (a, b) { return parseFloat(b) - parseFloat(a) });
+        let cumulative = 0;
+        for (let price of sorted) {
+            if (baseValue === 'cumulative') {
+                cumulative += parseFloat(cache[price]);
+                object[price] = cumulative;
+            } else if (!baseValue) object[price] = parseFloat(cache[price]);
+            else object[price] = parseFloat((cache[price] * parseFloat(price)).toFixed(8));
+            if (++count >= max) break;
         }
-        return object
+        return object;
     }
-    sortAsks(data) {
-        let object = {}
-        let sortedKeys = Object.keys(data).sort((a,b)=>parseFloat(a)-parseFloat(b))
-        for (let price of sortedKeys) {
-            object[price] = data[price]
+    sortAsks(symbol, max = Infinity, baseValue = false) {
+        let object = {}, count = 0, cache;
+        if (typeof symbol === 'object') cache = symbol;
+        else cache = getDepthCache(symbol).asks;
+        let sorted = Object.keys(cache).sort(function (a, b) { return parseFloat(a) - parseFloat(b) });
+        let cumulative = 0;
+        for (let price of sorted) {
+            if (baseValue === 'cumulative') {
+                cumulative += parseFloat(cache[price]);
+                object[price] = cumulative;
+            } else if (!baseValue) object[price] = parseFloat(cache[price]);
+            else object[price] = parseFloat((cache[price] * parseFloat(price)).toFixed(8));
+            if (++count >= max) break;
         }
-        return object
+        return object;
     }
     updateCupOrderbook() {
         this.cup.forEach((item) => {
@@ -58,7 +74,7 @@ class Currency {
         this.index = null
 
         this.tempCup.forEach((item) => {
-            this.index = this.cup.map(o => o.price).indexOf(Number(item.price))
+            this.index = this.cup.map(o => o.price).indexOf(item.price)
             if (this.index != -1) {
                 this.cup[this.index].vol = item.vol
                 this.cup[this.index].type = item.type
@@ -120,12 +136,12 @@ class Currency {
         this.tempCup = []
         this.counter = 0
 
-        for (let askPrice of this.askPrices) {
-            askPrice = ceil(askPrice, -this.numsAfterDecimal.cup)
+        for (let i = 0; i < this.askPrices.length; i++) {
+            this.askPrices[i] = ceil(this.askPrices[i], -this.numsAfterDecimal.cup)
         }
 
-        for (let bidPrice of this.bidPrices) {
-            bidPrice = floor(bidPrice, -this.numsAfterDecimal.cup)
+        for (let i = 0; i < this.bidPrices.length; i++) {
+            this.bidPrices[i] = floor(this.bidPrices[i], -this.numsAfterDecimal.cup)
         }
 
         for (let i = this.askPrices.length - 1; i > 0; i--) {
