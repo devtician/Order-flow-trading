@@ -1,7 +1,7 @@
 let { round, floor, ceil } = require('./helpers.js');
 
 class GlobalCurrency {
-    constructor(cupDecimals, tradesDecimals, symbol) {
+    constructor(cupDecimals, tradesDecimals, symbol, initFilterValue, position) {
         this.bids = [];
         this.asks = [];
         this.best = {};
@@ -21,6 +21,8 @@ class GlobalCurrency {
         this.index = null;
         this.roundedPrice = null;
         this.symbol = symbol;
+        this.initFilterValue = initFilterValue;
+        this.position = position
     }
     seedCup() {
         this.cup = []

@@ -2,12 +2,13 @@ let { round, floor, ceil } = require('./helpers.js')
 let GlobalCurrency = require('./globalCurrency.js')
 
 class Currency extends GlobalCurrency{
-    constructor(cupDecimals, tradesDecimals, symbol) {
-        super(cupDecimals, tradesDecimals, symbol)
+    constructor(cupDecimals, tradesDecimals, symbol, initFilterValue, position) {
+        super(cupDecimals, tradesDecimals, symbol, initFilterValue, position)
         this.bidPrices = [];
         this.askPrices = [];
         this.bidVolumes = [];
         this.askVolumes = [];
+        this.exchange = 'Binance';
     }
     sortBids(symbol, max = Infinity, baseValue = false) {
         let object = {}, count = 0, cache;

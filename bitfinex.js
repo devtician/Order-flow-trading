@@ -2,8 +2,8 @@ let { round, floor, ceil } = require('./helpers.js')
 let GlobalCurrency = require('./globalCurrency.js')
 
 class Currency extends GlobalCurrency{
-    constructor(cupDecimals, tradesDecimals, symbol) {
-        super(cupDecimals, tradesDecimals, symbol)
+    constructor(cupDecimals, tradesDecimals, symbol, initFilterValue, position) {
+        super(cupDecimals, tradesDecimals, symbol, initFilterValue, position)
         this.tempBids = [];
         this.tempAsks = [];
         this.responseVol = null;
@@ -11,6 +11,7 @@ class Currency extends GlobalCurrency{
             book: null,
             trades: null
         }
+        this.exchange = 'Bitfinex';
     }
     checkBestBid(price) {
         if (price >= this.best.bid.price) {
