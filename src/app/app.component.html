@@ -1,0 +1,26 @@
+<div class="main-grid">
+  <div class="currency" *ngFor='let currency of currencyArray'>
+    <h2 class="currency__name">{{currency.exchange}} - {{currency.symbol}}</h2>
+    <div class="currency__filter">
+      <input type="number" class="filter__input" id={{currency.exchange}}-{{currency.symbol}} value={{currency.initFilterValue}} (change)="changeFilterValue($event)">
+      <button (click)="resetFilter($event)" class="btn btn-blue">Clear</button>
+      <div class="filter__trades">
+        <div class="row" *ngFor="let trade of currency.trades" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
+          <div class="row__price">{{trade.price}}</div>
+          <div class="row__volume">{{trade.volume}}</div>
+          <div class="row__time">{{trade.time}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="currency__prices">
+      <div class="row" *ngFor="let row of currency.cup" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
+        <div class="row__level-2">{{row.vol}}</div>
+        <div class="row__price">{{row.price}}</div>
+        <div class="row__volume">
+          <span class="sold">{{row.hit}}</span>
+          <span class="bought">{{row.lift}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
