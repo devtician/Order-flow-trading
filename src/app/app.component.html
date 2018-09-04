@@ -5,7 +5,7 @@
       <input type="number" class="filter__input" id={{currency.exchange}}-{{currency.symbol}} value={{currency.initFilterValue}} (change)="changeFilterValue($event)">
       <button (click)="resetFilter($event)" class="btn btn-blue">Clear</button>
       <div class="filter__trades">
-        <div class="row" *ngFor="let trade of currency.trades.reverse()" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
+        <div class="row" *ngFor="let trade of currency.trades" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
           <div class="row__price">{{trade.price}}</div>
           <div class="row__volume">{{trade.volume}}</div>
           <div class="row__time">{{trade.time}}</div>

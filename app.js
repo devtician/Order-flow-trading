@@ -18,7 +18,7 @@ const wss = new WebSocket("wss://api.bitfinex.com/ws/2")
 
 let bitfinexCurrencyArray = [
     eos_usd = new BiftinexCurrency(2, 0, 'EOSUSD', 1000, 2),
-    btc_usd = new BiftinexCurrency(0, 4, 'BTCUSD', 1, 4),
+    btc_usd = new BiftinexCurrency(0, 2, 'BTCUSD', 1, 4),
 ]
 
 wss.onopen = () => {
@@ -39,14 +39,14 @@ wss.onmessage = (message) => {
                 } else {
                     let cup = currency.updateOrderbook(response)
                     if(cup != null){
-                        io.emit(`update-cup`, [cup, { exchange: currency.exchange, symbol: currency.symbol }])
+                        io.emit(`update-cup`, [cup, { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
                     }
                 }
             } else if (response[0] == currency.channelId.trades) {
                 let trades = currency.updateTrades(response)
                 if(trades != null){
-                    io.emit(`update-cup`, [trades[0], { exchange: currency.exchange, symbol: currency.symbol }])
-                    io.emit(`update-trades`, [trades[1], { exchange: currency.exchange, symbol: currency.symbol }])
+                    io.emit(`update-cup`, [trades[0], { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
+                    io.emit(`update-trades`, [trades[1], { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
                 }
             }
         }
@@ -83,18 +83,18 @@ const BinanceCurrency = require('./binance.js')
 
 let binanceCurrencyArray = [
     eos_usdt = new BinanceCurrency(2,0,'EOSUSDT', 1000, 1),
-    btc_usdt = new BinanceCurrency(0,4,'BTCUSDT', 1, 3)
+    btc_usdt = new BinanceCurrency(0,2,'BTCUSDT', 1, 3)
 ]
 
 for (let currency of binanceCurrencyArray) {
     binance.websockets.depthCache([currency.symbol], (symbol, depth) => {
         let output = currency.updateOrderbook(symbol, depth)
-        io.emit(`update-cup`, [output, { exchange: currency.exchange, symbol: currency.symbol }])
+        io.emit(`update-cup`, [output, { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal }])
     })
     binance.websockets.trades([currency.symbol], (trades) => {
         let output = currency.updateTrades(trades)
-        io.emit(`update-cup`, [output[0], { exchange: currency.exchange, symbol: currency.symbol }])
-        io.emit(`update-trades`, [output[1],{exchange:currency.exchange, symbol:currency.symbol}])
+        io.emit(`update-cup`, [output[0], { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal }])
+        io.emit(`update-trades`, [output[1],{exchange:currency.exchange, symbol:currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
     })
 }
 let currencyArray = [...binanceCurrencyArray, ...bitfinexCurrencyArray].sort((a, b) => a.position - b.position).map(a => { return {exchange: a.exchange, symbol: a.symbol, initFilterValue: a.initFilterValue, trades: [], cup: []} })

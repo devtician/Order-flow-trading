@@ -154,7 +154,7 @@ class Currency extends GlobalCurrency{
     }
     updateTrades(response) {
         if(response[1] == 'te') {
-            this.responseVol = round(Number(response[2][2], -this.numsAfterDecimal.trades))
+            this.responseVol = Number(response[2][2])
 
             if (this.responseVol > 0) {
                 this.roundedPrice = ceil(response[2][3], -this.numsAfterDecimal.cup)
@@ -166,9 +166,9 @@ class Currency extends GlobalCurrency{
 
             if (k == -1) {
                 if (this.responseVol > 0) {
-                    this.trades.push({ price: this.roundedPrice, hit: null, lift: round(Math.abs(this.responseVol), -this.numsAfterDecimal.trades) })
+                    this.trades.push({ price: this.roundedPrice, hit: null, lift: Number(round(Math.abs(this.responseVol), -this.numsAfterDecimal.trades)) })
                 } else {
-                    this.trades.push({ price: this.roundedPrice, hit: round(Math.abs(this.responseVol), -this.numsAfterDecimal.trades), lift: null })
+                    this.trades.push({ price: this.roundedPrice, hit: Number(round(Math.abs(this.responseVol),-this.numsAfterDecimal.trades)), lift: null })
                 }
             } else {
                 if (this.responseVol < 0) {
@@ -180,7 +180,7 @@ class Currency extends GlobalCurrency{
                 }
             }
 
-            return [this.updateCupTrades(), { price: this.roundedPrice, vol: this.responseVol, time: response[2][1] }]
+            return [this.updateCupTrades(), { price: this.roundedPrice, vol: round(this.responseVol, -this.numsAfterDecimal.trades).toFixed(this.numsAfterDecimal.trades), time: response[2][1] }]
         }
     }
     subscribeOrderbook() {

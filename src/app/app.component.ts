@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import * as io from 'socket.io-client'
+import * as io from 'socket.io-client';
 
 @Component({
   selector: 'app-root',
@@ -18,16 +18,18 @@ export class AppComponent implements OnInit{
     })
     this.socket.on('update-trades', (data) => {
       for (let currency of this.currencyArray) {
-        if (currency.exchange == data[1].exchange && currency.symbol == data[1].symbol && Math.round(Number(data[0].vol)) >= currency.initFilterValue) {
-          let date = new Date(data[0].time);
-          currency.trades.push({
-            volume: Math.round(Number(data[0].vol)).toLocaleString(),
-            time: date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
-            price: data[0].price,
-            side: data[0].side
-          })
-          if (currency.trades.length >= 58) {
-            currency.trades.pop()
+        if (currency.exchange == data[1].exchange && currency.symbol == data[1].symbol && Math.abs(Number(data[0].vol)) >= currency.initFilterValue) {
+          if (Math.abs(Number(data[0].vol)) != 0) {
+            let date = new Date(data[0].time);
+            currency.trades.unshift({
+              volume: Math.abs(Number(data[0].vol)).toFixed(data[1].numsAfterDecimal.trades),
+              time: date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
+              price: data[0].price.toFixed(data[1].numsAfterDecimal.cup),
+              side: typeof data[0].side === 'boolean' ? data[0].side : (Math.sign(data[0].vol) == 1 ? false : true)
+            })
+            if (currency.trades.length >= 58) {
+              currency.trades.pop()
+            }
           }
         }
       }
@@ -38,10 +40,10 @@ export class AppComponent implements OnInit{
           currency.cup = []
           for (let item of data[0]) {
             currency.cup.push({
-              vol: item.vol != '' ? Number(item.vol).toLocaleString() : '',
-              price: item.price,
-              hit: item.hit != null ? Number(item.hit).toLocaleString() : '',
-              lift: item.lift != null ? Number(item.lift).toLocaleString() : '',
+              vol: item.vol != '' ? item.vol : '',
+              price: item.price.toFixed(data[1].numsAfterDecimal.cup),
+              hit: item.hit != null ? item.hit.toFixed(data[1].numsAfterDecimal.trades) : '',
+              lift: item.lift != null ? item.lift.toFixed(data[1].numsAfterDecimal.trades) : '',
               type: item.type
             })
           }

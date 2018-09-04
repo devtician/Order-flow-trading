@@ -136,21 +136,21 @@ class Currency extends GlobalCurrency{
 
         if (index == -1) {
             if (maker == true) {
-                this.trades.push({ price: this.roundedPrice, hit: Math.round(Number(quantity)), lift: null })
+                this.trades.push({ price: this.roundedPrice, hit: Number(round(quantity, -this.numsAfterDecimal.trades)), lift: null })
             } else {
-                this.trades.push({ price: this.roundedPrice, hit: null, lift: Math.round(Number(quantity)) })
+                this.trades.push({ price: this.roundedPrice, hit: null, lift: Number(round(quantity, -this.numsAfterDecimal.trades))})
             }
         } else {
             if (maker == true) {
                 this.trades[index].hit += Number(quantity)
-                this.trades[index].hit = Math.round(this.trades[index].hit)
+                this.trades[index].hit = round(this.trades[index].hit, -this.numsAfterDecimal.trades)
             } else {
                 this.trades[index].lift += Number(quantity)
-                this.trades[index].lift = Math.round(this.trades[index].lift)
+                this.trades[index].lift = round(this.trades[index].lift, -this.numsAfterDecimal.trades)
             }
         }
 
-        return [this.updateCupTrades(), { price: this.roundedPrice, vol: quantity, time: eventTime, side: maker }]
+        return [this.updateCupTrades(), { price: this.roundedPrice, vol: round(quantity, -this.numsAfterDecimal.trades).toFixed(this.numsAfterDecimal.trades), time: eventTime, side: maker }]
     }
 }
 
