@@ -75,9 +75,18 @@ export class AppComponent implements OnInit{
   }
 
   hotkeys(e) {
-    e.preventDefault()
-    if (e.ctrlKey && e.which == 82) {
+    if (e.ctrlKey && e.which == 67) {
+      e.preventDefault()
       this.clearCups();
+    }
+    if (e.ctrlKey && e.which == 70) {
+      e.preventDefault()
+      let nodes = Array.from(document.querySelectorAll('.filter__trades'))
+      nodes.forEach(node => {
+        while (node.children.length != 0) {
+          node.removeChild(node.lastChild)
+        }
+      })
     }
   }
 
