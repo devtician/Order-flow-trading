@@ -72,6 +72,14 @@ class GlobalCurrency {
 
         return this.cup
     }
+    clearCup() {
+        this.trades = []
+        for (let row of this.cup) {
+            row.hit = null
+            row.lift = null
+        }
+        return this
+    }
 }
 
 module.exports = GlobalCurrency

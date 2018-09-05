@@ -2,13 +2,24 @@ const express = require('express')
 const app = express()
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const cors = require('cors');
 
 // CONFIG
 app.use(express.static(__dirname, +"/dist/order-flow-trading"))
+app.use(cors())
 
 // ROUTES
 app.get("/", function(req, res){
     res.status(200).sendFile(__dirname + '/dist/order-flow-trading/index.html')
+})
+
+app.get("/clear-cups", function(req, res){
+    for (let currency of currencyArray) {
+        currency.clearCup()
+    }
+    res.send({
+        worked: true
+    })
 })
 
 // BITFINEX INIT
@@ -18,7 +29,7 @@ const wss = new WebSocket("wss://api.bitfinex.com/ws/2")
 
 let bitfinexCurrencyArray = [
     eos_usd = new BiftinexCurrency(2, 0, 'EOSUSD', 1000, 2),
-    btc_usd = new BiftinexCurrency(0, 2, 'BTCUSD', 1, 4),
+    // btc_usd = new BiftinexCurrency(0, 2, 'BTCUSD', 1, 4),
 ]
 
 wss.onopen = () => {
@@ -82,8 +93,8 @@ const binance = require("node-binance-api")
 const BinanceCurrency = require('./binance.js')
 
 let binanceCurrencyArray = [
-    eos_usdt = new BinanceCurrency(2,0,'EOSUSDT', 1000, 1),
-    btc_usdt = new BinanceCurrency(0,2,'BTCUSDT', 1, 3)
+    // eos_usdt = new BinanceCurrency(2,0,'EOSUSDT', 1000, 1),
+    // btc_usdt = new BinanceCurrency(0,2,'BTCUSDT', 1, 3)
 ]
 
 for (let currency of binanceCurrencyArray) {
@@ -97,11 +108,11 @@ for (let currency of binanceCurrencyArray) {
         io.emit(`update-trades`, [output[1],{exchange:currency.exchange, symbol:currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
     })
 }
-let currencyArray = [...binanceCurrencyArray, ...bitfinexCurrencyArray].sort((a, b) => a.position - b.position).map(a => { return {exchange: a.exchange, symbol: a.symbol, initFilterValue: a.initFilterValue, trades: [], cup: []} })
+let currencyArray = [...binanceCurrencyArray, ...bitfinexCurrencyArray]
 
 // ON CONNECTION 
 io.on('connection', () => {
-    io.emit('getCurrencies', currencyArray)
+    io.emit('getCurrencies', currencyArray.sort((a, b) => a.position - b.position).map(a => { return { exchange: a.exchange, symbol: a.symbol, initFilterValue: a.initFilterValue, trades: [], cup: [] } }))
 })
 
 // SERVER

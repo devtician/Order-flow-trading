@@ -166,17 +166,17 @@ class Currency extends GlobalCurrency{
 
             if (k == -1) {
                 if (this.responseVol > 0) {
-                    this.trades.push({ price: this.roundedPrice, hit: null, lift: Number(round(Math.abs(this.responseVol), -this.numsAfterDecimal.trades)) })
+                    this.trades.push({ price: this.roundedPrice, hit: null, lift: Math.round(Math.abs(this.responseVol)) })
                 } else {
-                    this.trades.push({ price: this.roundedPrice, hit: Number(round(Math.abs(this.responseVol),-this.numsAfterDecimal.trades)), lift: null })
+                    this.trades.push({ price: this.roundedPrice, hit: Math.round(Math.abs(this.responseVol)), lift: null })
                 }
             } else {
                 if (this.responseVol < 0) {
                     this.trades[k].hit += Math.abs(this.responseVol)
-                    this.trades[k].hit = round(this.trades[k].hit, -this.numsAfterDecimal.trades)
+                    this.trades[k].hit = Math.round(this.trades[k].hit)
                 } else {
                     this.trades[k].lift += Math.abs(this.responseVol)
-                    this.trades[k].lift = round(this.trades[k].lift, -this.numsAfterDecimal.trades)
+                    this.trades[k].lift = Math.round(this.trades[k].lift)
                 }
             }
 

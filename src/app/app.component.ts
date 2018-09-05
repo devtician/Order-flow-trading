@@ -1,15 +1,21 @@
 import { Component, OnInit} from '@angular/core';
 import * as io from 'socket.io-client';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  host: { '(window:keydown)': 'hotkeys($event)' },
 })
 
 export class AppComponent implements OnInit{
   currencyArray = [];
   socket;
+
+  constructor(private http: HttpClient) {
+
+  }
 
   ngOnInit() {
     this.socket = io.connect('http://localhost:3000')
@@ -42,8 +48,8 @@ export class AppComponent implements OnInit{
             currency.cup.push({
               vol: item.vol != '' ? item.vol : '',
               price: item.price.toFixed(data[1].numsAfterDecimal.cup),
-              hit: item.hit != null ? item.hit.toFixed(data[1].numsAfterDecimal.trades) : '',
-              lift: item.lift != null ? item.lift.toFixed(data[1].numsAfterDecimal.trades) : '',
+              hit: item.hit != null && item.hit >= 1 ? item.hit : '',
+              lift: item.lift != null && item.hit >= 1 ? item.lift : '',
               type: item.type
             })
           }
@@ -66,5 +72,16 @@ export class AppComponent implements OnInit{
     while (filter.children.length != 0) {
       filter.removeChild(filter.lastChild)
     }
+  }
+
+  hotkeys(e) {
+    e.preventDefault()
+    if (e.ctrlKey && e.which == 82) {
+      this.clearCups();
+    }
+  }
+
+  clearCups() {
+    this.http.get('http://localhost:3000/clear-cups').subscribe(data => console.log(data))
   }
 }
