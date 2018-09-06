@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, { 'pingTimeout': 7000, 'pingInterval': 1000 });
 const cors = require('cors');
 
 // CONFIG

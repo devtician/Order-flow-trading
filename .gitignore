@@ -5,6 +5,7 @@
 /tmp
 /out-tsc
 /build
+/order-flow-trading*
 
 # dependencies
 /node_modules
