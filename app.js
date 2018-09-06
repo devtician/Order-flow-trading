@@ -29,7 +29,7 @@ const wss = new WebSocket("wss://api.bitfinex.com/ws/2")
 
 let bitfinexCurrencyArray = [
     eos_usd = new BiftinexCurrency(2, 0, 'EOSUSD', 1000, 2),
-    btc_usd = new BiftinexCurrency(0, 2, 'BTCUSD', 1, 4),
+    btc_usd = new BiftinexCurrency(0, 2, 'BTCUSD', 2, 4),
 ]
 
 wss.onopen = () => {
@@ -94,7 +94,7 @@ const BinanceCurrency = require('./binance.js')
 
 let binanceCurrencyArray = [
     eos_usdt = new BinanceCurrency(2,0,'EOSUSDT', 1000, 1),
-    btc_usdt = new BinanceCurrency(0,2,'BTCUSDT', 1, 3)
+    btc_usdt = new BinanceCurrency(0,2,'BTCUSDT', 2, 3)
 ]
 
 for (let currency of binanceCurrencyArray) {

@@ -49,7 +49,7 @@ export class AppComponent implements OnInit{
               vol: item.vol != '' ? item.vol : '',
               price: item.price.toFixed(data[1].numsAfterDecimal.cup),
               hit: item.hit != null && item.hit >= 1 ? item.hit : '',
-              lift: item.lift != null && item.hit >= 1 ? item.lift : '',
+              lift: item.lift != null && item.lift >= 1 ? item.lift : '',
               type: item.type
             })
           }

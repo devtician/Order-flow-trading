@@ -73,7 +73,7 @@ class Currency extends GlobalCurrency{
                     this.bids[this.bids.map(o => o.price).indexOf(price)].volume = volume
                 }
                 this.checkBestBid(price)
-            } else {
+            } else if (volume < 0) {
                 if (!this.asks.map(o => o.price).includes(price)) {
                     this.asks.push({ price: price, volume: Math.abs(volume) })
                 } else {
