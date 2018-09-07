@@ -70,7 +70,15 @@ class GlobalCurrency {
             }
         })
 
-        return this.cup
+        return this.cup.map((o) => {
+            return {
+                vol: o.vol != '' ? o.vol : '',
+                price: o.price.toFixed(this.numsAfterDecimal.cup),
+                hit: o.hit != null && o.hit >= 1 ? o.hit : '',
+                lift: o.lift != null && o.lift >= 1 ? o.lift : '',
+                type: o.type
+            }
+        })
     }
     clearCup() {
         this.trades = []

@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const server = require('http').Server(app);
-const io = require('socket.io')(server, { 'pingTimeout': 7000, 'pingInterval': 1000 });
+const io = require('socket.io')(server, { 'pingTimeout': 100000, 'pingInterval': 25000 });
 const cors = require('cors');
 
 // CONFIG
@@ -50,14 +50,14 @@ wss.onmessage = (message) => {
                 } else {
                     let cup = currency.updateOrderbook(response)
                     if(cup != null){
-                        io.emit(`update-cup`, [cup, { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
+                        io.emit(`update-cup-bitfinex-${currency.symbol}`, cup)
                     }
                 }
             } else if (response[0] == currency.channelId.trades) {
                 let trades = currency.updateTrades(response)
                 if(trades != null){
-                    io.emit(`update-cup`, [trades[0], { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
-                    io.emit(`update-trades`, [trades[1], { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
+                    io.emit(`update-cup-bitfinex-${currency.symbol}`, trades[0])
+                    io.emit(`update-trades-bitfinex-${currency.symbol}`, [trades[1], { numsAfterDecimal: currency.numsAfterDecimal}])
                 }
             }
         }
@@ -100,12 +100,12 @@ let binanceCurrencyArray = [
 for (let currency of binanceCurrencyArray) {
     binance.websockets.depthCache([currency.symbol], (symbol, depth) => {
         let output = currency.updateOrderbook(symbol, depth)
-        io.emit(`update-cup`, [output, { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal }])
+        io.emit(`update-cup-binance-${currency.symbol}`, output)
     })
     binance.websockets.trades([currency.symbol], (trades) => {
         let output = currency.updateTrades(trades)
-        io.emit(`update-cup`, [output[0], { exchange: currency.exchange, symbol: currency.symbol, numsAfterDecimal: currency.numsAfterDecimal }])
-        io.emit(`update-trades`, [output[1],{exchange:currency.exchange, symbol:currency.symbol, numsAfterDecimal: currency.numsAfterDecimal}])
+        io.emit(`update-cup-binance-${currency.symbol}`, output[0])
+        io.emit(`update-trades-binance-${currency.symbol}`, [output[1],{ numsAfterDecimal: currency.numsAfterDecimal}])
     })
 }
 let currencyArray = [...binanceCurrencyArray, ...bitfinexCurrencyArray]
