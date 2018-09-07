@@ -1,4 +1,4 @@
-<!-- <div class="main-grid">
+<div class="main-grid">
   <div class="currency" *ngFor='let currency of currencyArray'>
     <h2 class="currency__name">{{currency.exchange}} - {{currency.symbol}}</h2>
     <div class="currency__filter">
@@ -13,105 +13,7 @@
       </div>
     </div>
     <div class="currency__prices">
-      <div class="row" *ngFor="let row of currency.cup" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
-        <div class="row__level-2">{{row.vol}}</div>
-        <div class="row__price">{{row.price}}</div>
-        <div class="row__volume">
-          <span class="sold">{{row.hit}}</span>
-          <span class="bought">{{row.lift}}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div> -->
-<div class="main-grid">
-  <div class="currency">
-    <h2 class="currency__name">{{binanceEOS.exchange}} - {{binanceEOS.symbol}}</h2>
-    <div class="currency__filter">
-      <input type="number" class="filter__input" id={{binanceEOS.exchange}}-{{binanceEOS.symbol}} value={{binanceEOS.initFilterValue}} (change)="changeFilterValue($event)">
-      <button (click)="resetFilter($event)" class="btn btn-blue">Clear</button>
-      <div class="filter__trades">
-        <div class="row" *ngFor="let trade of binanceEOS.trades" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
-          <div class="row__price">{{trade.price}}</div>
-          <div class="row__volume">{{trade.volume}}</div>
-          <div class="row__time">{{trade.time}}</div>
-        </div>
-      </div>
-    </div>
-    <div class="currency__prices">
-      <div class="row" *ngFor="let row of binanceEOS.cup" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
-        <div class="row__level-2">{{row.vol}}</div>
-        <div class="row__price">{{row.price}}</div>
-        <div class="row__volume">
-          <span class="sold">{{row.hit}}</span>
-          <span class="bought">{{row.lift}}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="currency">
-    <h2 class="currency__name">{{bitfinexEOS.exchange}} - {{bitfinexEOS.symbol}}</h2>
-    <div class="currency__filter">
-      <input type="number" class="filter__input" id={{bitfinexEOS.exchange}}-{{bitfinexEOS.symbol}} value={{bitfinexEOS.initFilterValue}} (change)="changeFilterValue($event)">
-      <button (click)="resetFilter($event)" class="btn btn-blue">Clear</button>
-      <div class="filter__trades">
-        <div class="row" *ngFor="let trade of bitfinexEOS.trades" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
-          <div class="row__price">{{trade.price}}</div>
-          <div class="row__volume">{{trade.volume}}</div>
-          <div class="row__time">{{trade.time}}</div>
-        </div>
-      </div>
-    </div>
-    <div class="currency__prices">
-      <div class="row" *ngFor="let row of bitfinexEOS.cup" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
-        <div class="row__level-2">{{row.vol}}</div>
-        <div class="row__price">{{row.price}}</div>
-        <div class="row__volume">
-          <span class="sold">{{row.hit}}</span>
-          <span class="bought">{{row.lift}}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="currency">
-    <h2 class="currency__name">{{binanceBTC.exchange}} - {{binanceBTC.symbol}}</h2>
-    <div class="currency__filter">
-      <input type="number" class="filter__input" id={{binanceBTC.exchange}}-{{binanceBTC.symbol}} value={{binanceBTC.initFilterValue}} (change)="changeFilterValue($event)">
-      <button (click)="resetFilter($event)" class="btn btn-blue">Clear</button>
-      <div class="filter__trades">
-        <div class="row" *ngFor="let trade of binanceBTC.trades" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
-          <div class="row__price">{{trade.price}}</div>
-          <div class="row__volume">{{trade.volume}}</div>
-          <div class="row__time">{{trade.time}}</div>
-        </div>
-      </div>
-    </div>
-    <div class="currency__prices">
-      <div class="row" *ngFor="let row of binanceBTC.cup" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
-        <div class="row__level-2">{{row.vol}}</div>
-        <div class="row__price">{{row.price}}</div>
-        <div class="row__volume">
-          <span class="sold">{{row.hit}}</span>
-          <span class="bought">{{row.lift}}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="currency">
-    <h2 class="currency__name">{{bitfinexBTC.exchange}} - {{bitfinexBTC.symbol}}</h2>
-    <div class="currency__filter">
-      <input type="number" class="filter__input" id={{bitfinexBTC.exchange}}-{{bitfinexBTC.symbol}} value={{bitfinexBTC.initFilterValue}} (change)="changeFilterValue($event)">
-      <button (click)="resetFilter($event)" class="btn btn-blue">Clear</button>
-      <div class="filter__trades">
-        <div class="row" *ngFor="let trade of bitfinexBTC.trades" [ngClass]="{'row--sell': trade.side == true, 'row--buy': trade.side == false}">
-          <div class="row__price">{{trade.price}}</div>
-          <div class="row__volume">{{trade.volume}}</div>
-          <div class="row__time">{{trade.time}}</div>
-        </div>
-      </div>
-    </div>
-    <div class="currency__prices">
-      <div class="row" *ngFor="let row of bitfinexBTC.cup" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
+      <div class="row" *ngFor="let row of currency.cup;trackBy: trackByFn" [ngClass]="{'row--mid': row.type == 'mid', 'row--ask': row.type == 'ask', 'row--bid': row.type == 'bid'}">
         <div class="row__level-2">{{row.vol}}</div>
         <div class="row__price">{{row.price}}</div>
         <div class="row__volume">
